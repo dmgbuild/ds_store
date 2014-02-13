@@ -1,6 +1,7 @@
 syntax: glob
 *~
 *.pyc
+.DS_Store
 
 syntax:regexp
 ^ds_store.egg-info/
