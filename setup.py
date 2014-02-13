@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from distutils.core import setup
+from setuptools import setup
 
 setup(name='ds_store',
       version='1.0.0',
@@ -26,9 +26,9 @@ __ http://search.cpan.org/~wiml/Mac-Finder-DSStore/DSStoreFormat.pod
           'License :: OSI Approved :: MIT License',
           'Topic :: Desktop Environment',
           'Topic :: Software Development :: Libraries :: Python Modules'],
-      requires=[
-          'biplist',
-          'six'
+      install_requires=[
+          'biplist (>= 0.6)',
+          'six (>= 1.4.1)'
           ],
       provides=[
           'ds_store'
