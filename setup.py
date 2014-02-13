@@ -19,7 +19,7 @@ __ http://search.cpan.org/~wiml/Mac-Finder-DSStore/DSStoreFormat.pod
       author_email='alastair@alastairs-place.net',
       url='http://alastairs-place.net/projects/ds_store',
       license='MIT License',
-      platform='Any',
+      platforms='Any',
       packages=['ds_store'],
       classifiers=[
           'Development Status :: Development Status :: 5 - Production/Stable',
