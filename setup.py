@@ -27,8 +27,8 @@ __ http://search.cpan.org/~wiml/Mac-Finder-DSStore/DSStoreFormat.pod
           'Topic :: Desktop Environment',
           'Topic :: Software Development :: Libraries :: Python Modules'],
       install_requires=[
-          'biplist (>= 0.6)',
-          'six (>= 1.4.1)'
+          'biplist >= 0.6',
+          'six >= 1.4.1'
           ],
       provides=[
           'ds_store'
