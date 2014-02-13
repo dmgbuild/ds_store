@@ -22,7 +22,7 @@ __ http://search.cpan.org/~wiml/Mac-Finder-DSStore/DSStoreFormat.pod
       platforms='Any',
       packages=['ds_store'],
       classifiers=[
-          'Development Status :: Development Status :: 5 - Production/Stable',
+          'Development Status :: 5 - Production/Stable',
           'License :: OSI Approved :: MIT License',
           'Topic :: Desktop Environment',
           'Topic :: Software Development :: Libraries :: Python Modules'],
