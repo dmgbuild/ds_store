@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 from setuptools import setup
 
 setup(name='ds_store',
       version='1.0.0',
       description='Manipulate Finder .DS_Store files from Python',
-      long_description=u"""
+      long_description="""
 ``ds_store`` lets you examine and modify ``.DS_Store`` files from Python code;
 since it is written in pure Python, it is portable and will run on any
 platform, not just Mac OS X.
