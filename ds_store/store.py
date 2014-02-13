@@ -243,7 +243,7 @@ class DSStore (object):
 
       d['foobar.dat']['note'] = ('ustr', u'Hello World!')
 
-    as does deletion with `del'::
+    as does deletion with ``del``::
 
       del d['foobar.dat']['note']
 
