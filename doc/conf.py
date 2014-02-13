@@ -31,7 +31,9 @@ sys.path.insert(0, os.path.abspath('..'))
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx']
 
 # Set our InterSphinx mapping
-intersphinx_mapping = { 'python': ('http://docs.python.org/3', None) }
+intersphinx_mapping = {
+    'python': ('http://python.readthedocs.org/en/latest/', None)
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
