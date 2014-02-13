@@ -247,10 +247,6 @@ class DSStore (object):
 
       del d['foobar.dat']['note']
 
-    or even::
-
-      del d['foobar.dat']
-
     This is usually going to be the most convenient interface, though
     occasionally (for instance when creating a new ``.DS_Store`` file) you
     may wish to drop down to using :class:`DSStoreEntry` objects directly."""
