@@ -6,3 +6,4 @@ syntax: glob
 syntax:regexp
 ^ds_store.egg-info/
 ^doc/_build/
+^dist/
