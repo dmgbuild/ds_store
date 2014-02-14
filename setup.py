@@ -2,7 +2,7 @@
 from setuptools import setup
 
 setup(name='ds_store',
-      version='1.0.0',
+      version='1.0.1',
       description='Manipulate Finder .DS_Store files from Python',
       long_description=u"""
 ``ds_store`` lets you examine and modify ``.DS_Store`` files from Python code;
