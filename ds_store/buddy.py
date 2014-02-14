@@ -330,8 +330,9 @@ class Allocator (object):
 
         block.write('>I', len(keys))
         for k in keys:
-            block.write('B', len(k))
-            block.write(k)
+            b = k.encode('utf-8')
+            block.write('B', len(b))
+            block.write(b)
             block.write('>I', self._toc[k])
 
         # Free list

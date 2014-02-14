@@ -196,25 +196,25 @@ class DSStoreEntry (object):
             value = self.type.encode(self.value)
             
         utf16 = self.filename.encode('utf-16be')
-        w('>I', len(utf16) / 2)
+        w(b'>I', len(utf16) / 2)
         w(utf16)
-        w('>4s4s', self.code, entry_type)
+        w(b'>4s4s', self.code.encode('utf-8'), entry_type.encode('utf-8'))
 
         if entry_type == 'bool':
-            w('>?', value)
+            w(b'>?', value)
         elif entry_type == 'long' or entry_type == 'shor':
-            w('>I', value)
+            w(b'>I', value)
         elif entry_type == 'blob':
-            w('>I', len(value))
+            w(b'>I', len(value))
             w(value)
         elif entry_type == 'ustr':
             utf16 = value.encode('utf-16be')
-            w('>I', len(utf16) / 2)
+            w(b'>I', len(utf16) / 2)
             w(utf16)
         elif entry_type == 'type':
-            w('>4s', value)
+            w(b'>4s', value.encode('utf-8'))
         elif entry_type == 'comp' or entry_type == 'dutc':
-            w('>Q', value)
+            w(b'>Q', value)
         else:
             raise ValueError('Unknown type code "%s"' % entry_type)
     
