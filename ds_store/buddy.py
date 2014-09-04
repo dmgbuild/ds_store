@@ -82,7 +82,10 @@ class Block(object):
         self._pos += size
         
         if fmt is not None:
-            return struct.unpack(size_or_format, data)
+            if isinstance(data, bytearray):
+                return struct.unpack_from(fmt, bytes(data))
+            else:
+                return struct.unpack(fmt, data)
         else:
             return data
 
@@ -282,7 +285,10 @@ class Allocator(object):
             ret += b'\0' * (size - len(ret))
 
         if fmt is not None:
-            ret = struct.unpack(fmt, ret)
+            if isinstance(ret, bytearray):
+                ret = struct.unpack_from(fmt, bytes(ret))
+            else:
+                ret = struct.unpack(fmt, ret)
             
         return ret
 

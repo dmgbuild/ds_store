@@ -25,8 +25,11 @@ class ILocCodec(object):
                            0xffffffff, 0xffff0000)
 
     @staticmethod
-    def decode(bytes):
-        x, y = struct.unpack(b'>II', bytes[:8])
+    def decode(bytesData):
+        if isinstance(bytesData, bytearray):
+            x, y = struct.unpack_from(b'>II', bytes(bytesData[:8]))
+        else:
+            x, y = struct.unpack(b'>II', bytesData[:8])
         return (x, y)
 
 class PlistCodec(object):
