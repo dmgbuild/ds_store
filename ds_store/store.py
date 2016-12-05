@@ -6,6 +6,7 @@ from __future__ import division
 import binascii
 import struct
 import biplist
+import mac_alias
 
 try:
     next
@@ -41,6 +42,15 @@ class PlistCodec(object):
     def decode(bytes):
         return biplist.readPlistFromString(bytes)
 
+class BookmarkCodec(object):
+    @staticmethod
+    def encode(bmk):
+        return bmk.to_bytes()
+
+    @staticmethod
+    def decode(bytes):
+        return mac_alias.Bookmark.from_bytes(bytes)
+
 # This list tells the code how to decode particular kinds of entry in the
 # .DS_Store file.  This is really a convenience, and we currently only
 # support a tiny subset of the possible entry types.
@@ -50,6 +60,7 @@ codecs = {
     'lsvp': PlistCodec,
     'lsvP': PlistCodec,
     'icvp': PlistCodec,
+    'pBBk': BookmarkCodec
     }
 
 class DSStoreEntry(object):

@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-ds_store - Manipulate Finder `.DS_Store` files from Python
-==========================================================
+ds_store - Manipulate Finder ``.DS_Store`` files from Python
+============================================================
 
 This document refers to version |release|
 
