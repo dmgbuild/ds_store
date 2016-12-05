@@ -563,7 +563,7 @@ class DSStore(object):
                     entries.append(entry)
                     pointers.append(right_ptr)
                     before.append(total)
-                    total += entry_Size
+                    total += entry_size
                 entries.append(e)
                 before.append(total)
                 total += block.tell() - pos
@@ -571,7 +571,7 @@ class DSStore(object):
             if next_node:
                 pointers.append(next_node)
 
-            pivot = self._split2([left_block, right_block],
+            pivot = self._split2([block, right_block],
                                  entries, pointers, before,
                                  bool(next_node))[0]
             
