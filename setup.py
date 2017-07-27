@@ -34,6 +34,7 @@ setup(name='ds_store',
           'Topic :: Software Development :: Libraries :: Python Modules'],
       install_requires=[
           'biplist >= 0.6',
+          'mac_alias >= 2.0.1',
           ],
       tests_require=['pytest'],
       cmdclass={
