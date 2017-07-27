@@ -55,12 +55,12 @@ class BookmarkCodec(object):
 # .DS_Store file.  This is really a convenience, and we currently only
 # support a tiny subset of the possible entry types.
 codecs = {
-    'Iloc': ILocCodec,
-    'bwsp': PlistCodec,
-    'lsvp': PlistCodec,
-    'lsvP': PlistCodec,
-    'icvp': PlistCodec,
-    'pBBk': BookmarkCodec
+    b'Iloc': ILocCodec,
+    b'bwsp': PlistCodec,
+    b'lsvp': PlistCodec,
+    b'lsvP': PlistCodec,
+    b'icvp': PlistCodec,
+    b'pBBk': BookmarkCodec
     }
 
 class DSStoreEntry(object):
@@ -1134,6 +1134,8 @@ class DSStore(object):
 
     # Find implementation
     def _find(self, node, filename_lc, code=None):
+        if not isinstance(code, bytes):
+            code = code.encode('latin_1')
         with self._get_block(node) as block:
             next_node, count = block.read(b'>II')
             if next_node:
@@ -1196,7 +1198,7 @@ class DSStore(object):
                 raise KeyError('no such key - [%s][%s]' % (self._filename,
                                code))
 
-            if not isinstance(item.type, (str, unicode)):
+            if not isinstance(item.type, (bytes, str, unicode)):
                 return item.value
             
             return (item.type, item.value)

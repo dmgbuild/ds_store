@@ -1,20 +1,26 @@
 # -*- coding: utf-8 -*-
+import sys
 from setuptools import setup
+from setuptools.command.test import test as TestCommand
+
+class PyTest(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
+
+with open('README.rst', 'rb') as f:
+    longdesc = f.read().decode('utf-8')
 
 setup(name='ds_store',
       version='1.1.0',
       description='Manipulate Finder .DS_Store files from Python',
-      long_description=u"""
-``ds_store`` lets you examine and modify ``.DS_Store`` files from Python code;
-since it is written in pure Python, it is portable and will run on any
-platform, not just Mac OS X.
-
-Credit is due to Wim Lewis <wiml@hhhh.org>, Mark Mentovai and
-Yvan Barthélemy for reverse-engineering the .DS_Store file format.
-See `Wim Lewis’ excellent documentation on CPAN`__ for more information.
-
-__ http://search.cpan.org/~wiml/Mac-Finder-DSStore/DSStoreFormat.pod
-""",
+      long_description=longdesc,
       author='Alastair Houghton',
       author_email='alastair@alastairs-place.net',
       url='http://alastairs-place.net/projects/ds_store',
@@ -28,8 +34,11 @@ __ http://search.cpan.org/~wiml/Mac-Finder-DSStore/DSStoreFormat.pod
           'Topic :: Software Development :: Libraries :: Python Modules'],
       install_requires=[
           'biplist >= 0.6',
-          'six >= 1.4.1'
           ],
+      tests_require=['pytest'],
+      cmdclass={
+          'test': PyTest
+          },
       provides=[
           'ds_store'
           ])
