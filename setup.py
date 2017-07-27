@@ -18,7 +18,7 @@ with open('README.rst', 'rb') as f:
     longdesc = f.read().decode('utf-8')
 
 setup(name='ds_store',
-      version='1.1.0',
+      version='1.1.1',
       description='Manipulate Finder .DS_Store files from Python',
       long_description=longdesc,
       author='Alastair Houghton',
