@@ -1,3 +1,4 @@
+# Some basic test code
 from ds_store import DSStore
 import os
 
