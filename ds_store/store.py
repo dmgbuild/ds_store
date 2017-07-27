@@ -76,6 +76,10 @@ class DSStoreEntry(object):
     def __init__(self, filename, code, typecode, value=None):
         if str != bytes and type(filename) == bytes:
             filename = filename.decode('utf-8')
+
+        if not isinstance(code, bytes):
+            code = code.encode('latin_1')
+
         self.filename = filename
         self.code = code
         self.type = typecode
@@ -187,25 +191,28 @@ class DSStoreEntry(object):
         utf16 = self.filename.encode('utf-16be')
         l = 4 + len(utf16) + 8
 
-        if isinstance(self.type, (str, unicode)):
+        if isinstance(self.type, unicode):
+            entry_type = self.type.encode('latin_1')
+            value = self.value
+        elif isinstance(self.type, (bytes, str)):
             entry_type = self.type
             value = self.value
         else:
-            entry_type = 'blob'
+            entry_type = b'blob'
             value = self.type.encode(self.value)
             
-        if entry_type == 'bool':
+        if entry_type == b'bool':
             l += 1
-        elif entry_type == 'long' or entry_type == 'shor':
+        elif entry_type == b'long' or entry_type == b'shor':
             l += 4
-        elif entry_type == 'blob':
+        elif entry_type == b'blob':
             l += 4 + len(value)
-        elif entry_type == 'ustr':
+        elif entry_type == b'ustr':
             utf16 = value.encode('utf-16be')
             l += 4 + len(utf16)
-        elif entry_type == 'type':
+        elif entry_type == b'type':
             l += 4
-        elif entry_type == 'comp' or entry_type == 'dutc':
+        elif entry_type == b'comp' or entry_type == b'dutc':
             l += 8
         else:
             raise ValueError('Unknown type code "%s"' % entry_type)
@@ -218,33 +225,38 @@ class DSStoreEntry(object):
             w = block.insert
         else:
             w = block.write
-        
-        if isinstance(self.type, (str, unicode)):
+
+        if isinstance(self.type, unicode):
+            entry_type = self.type.encode('latin_1')
+            value = self.value
+        elif isinstance(self.type, (bytes, str)):
             entry_type = self.type
             value = self.value
         else:
-            entry_type = 'blob'
+            entry_type = b'blob'
             value = self.type.encode(self.value)
-            
+
         utf16 = self.filename.encode('utf-16be')
         w(b'>I', len(utf16) // 2)
         w(utf16)
-        w(b'>4s4s', self.code.encode('utf-8'), entry_type.encode('utf-8'))
+        w(b'>4s4s', self.code, entry_type)
 
-        if entry_type == 'bool':
+        if entry_type == b'bool':
             w(b'>?', value)
-        elif entry_type == 'long' or entry_type == 'shor':
+        elif entry_type == b'long' or entry_type == b'shor':
             w(b'>I', value)
-        elif entry_type == 'blob':
+        elif entry_type == b'blob':
             w(b'>I', len(value))
             w(value)
-        elif entry_type == 'ustr':
+        elif entry_type == b'ustr':
             utf16 = value.encode('utf-16be')
             w(b'>I', len(utf16) // 2)
             w(utf16)
-        elif entry_type == 'type':
-            w(b'>4s', value.encode('utf-8'))
-        elif entry_type == 'comp' or entry_type == 'dutc':
+        elif entry_type == b'type':
+            if isinstance(value, unicode):
+                value = value.encode('latin_1')
+            w(b'>4s', value)
+        elif entry_type == b'comp' or entry_type == b'dutc':
             w(b'>Q', value)
         else:
             raise ValueError('Unknown type code "%s"' % entry_type)
@@ -1191,7 +1203,10 @@ class DSStore(object):
         def __getitem__(self, code):
             if code is None:
                 raise KeyError('no such key - [%s][None]' % self._filename)
-            
+
+            if not isinstance(code, bytes):
+                code = code.encode('latin_1')
+
             try:
                 item = next(self._store.find(self._filename, code))
             except StopIteration:
@@ -1206,6 +1221,9 @@ class DSStore(object):
         def __setitem__(self, code, value):
             if code is None:
                 raise KeyError('bad key - [%s][None]' % self._filename)
+
+            if not isinstance(code, bytes):
+                code = code.encode('latin_1')
 
             codec = codecs.get(code, None)
             if codec:
