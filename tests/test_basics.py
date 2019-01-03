@@ -35,3 +35,11 @@ def test_holds_data(tmpdir):
         assert store['foobar.dat']['note'] == (b'ustr', u'Hello World!')
 
     os.unlink(store_name)
+
+def test_find(tmpdir):
+    """Test that we can find records with and without a code"""
+    with DSStore.open('tests/Test_DS_Store', 'r') as store:
+        bamIloc = list(store.find('bam',code='Iloc'))
+        assert len(bamIloc) == 1
+        bam = list(store.find('bam'))
+        assert bamIloc == bam
