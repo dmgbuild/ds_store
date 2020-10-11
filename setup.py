@@ -37,6 +37,7 @@ setup(name='ds_store',
           'mac_alias >= 2.0.1',
           ],
       tests_require=['pytest'],
+      scripts=['scripts/ds_store'],
       cmdclass={
           'test': PyTest
           },
