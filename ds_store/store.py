@@ -5,8 +5,8 @@ from __future__ import division
 
 import binascii
 import struct
-import biplist
 import mac_alias
+import sys
 
 try:
     next
@@ -33,14 +33,28 @@ class ILocCodec(object):
             x, y = struct.unpack(b'>II', bytesData[:8])
         return (x, y)
 
-class PlistCodec(object):
-    @staticmethod
-    def encode(plist):
-        return biplist.writePlistToString(plist)
+if sys.version_info < (3, 4):
+    import biplist
 
-    @staticmethod
-    def decode(bytes):
-        return biplist.readPlistFromString(bytes)
+    class PlistCodec(object):
+        @staticmethod
+        def encode(plist):
+            return biplist.writePlistToString(plist)
+
+        @staticmethod
+        def decode(bytes):
+            return biplist.readPlistFromString(bytes)
+else:
+    import plistlib
+
+    class PlistCodec(object):
+        @staticmethod
+        def encode(plist):
+            return plistlib.dumps(plist, fmt=plistlib.FMT_BINARY)
+
+        @staticmethod
+        def decode(bytes):
+            return plistlib.loads(bytes)
 
 class BookmarkCodec(object):
     @staticmethod
@@ -280,7 +294,7 @@ class DSStore(object):
 
     Currently, we know how to decode "Iloc", "bwsp", "lsvp", "lsvP" and "icvp"
     blobs.  "Iloc" decodes to an (x, y) tuple, while the others are all decoded
-    using ``biplist``.
+    using ``biplist`` or ``plistlib`` depending on Python version.
 
     Assignment also works, e.g.::
 
@@ -301,7 +315,7 @@ class DSStore(object):
             self._nodes, self._page_size = s.read(b'>IIIII')
         self._min_usage = 2 * self._page_size // 3
         self._dirty = False
-        
+
     @classmethod
     def open(cls, file_or_name, mode='r+', initial_entries=None):
         """Open a ``.DS_Store`` file; pass either a Python file object, or a

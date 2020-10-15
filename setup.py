@@ -14,6 +14,12 @@ class PyTest(TestCommand):
         errno = pytest.main(self.test_args)
         sys.exit(errno)
 
+requires = [ 'mac_alias >= 2.0.1' ]
+
+# On Python <3.4, we need biplist
+if sys.version_info < (3, 4):
+    requires.append('biplist >= 0.6')
+
 with open('README.rst', 'rb') as f:
     longdesc = f.read().decode('utf-8')
 
@@ -32,10 +38,7 @@ setup(name='ds_store',
           'License :: OSI Approved :: MIT License',
           'Topic :: Desktop Environment',
           'Topic :: Software Development :: Libraries :: Python Modules'],
-      install_requires=[
-          'biplist >= 0.6',
-          'mac_alias >= 2.0.1',
-          ],
+      install_requires=requires,
       tests_require=['pytest'],
       scripts=['scripts/ds_store'],
       cmdclass={
