@@ -1,24 +1,11 @@
 language: python
 
-install:
-  - |
-    pushd . && cd /opt/pyenv && git checkout master && git pull && popd
-    pyenv install --skip-existing $PYTHON_VERSION
-    pyenv global $PYTHON_VERSION
-    pyenv shell $PYTHON_VERSION
-    pip install -U pip setuptools wheel py
-    pip install .
-
 matrix:
   include:
     - os: linux
-      language: generic
-      env: PYTHON_VERSION=3.9.0
+      python: "3.9-dev"
     - os: linux
-      language: generic
-      env: PYTHON_VERSION=3.3.2
-    - os: linux
-      language: generic
-      env: PYTHON_VERSION=2.7.16
+      dist: trusty
+      python: "2.7.15"
 
 script: python setup.py test
