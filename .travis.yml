@@ -1,11 +1,26 @@
 language: python
 
-python:
-  - "2.7.16"
-  - "3.3.2"
-  - "3.9.0"
-
 install:
-  - pip install .
+  - |
+    curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
+    export PATH=~/.pyenv/bin:$PATH
+    eval "$(pyenv init -)"
+    pyenv install --skip-existing $PYTHON_VERSION
+    pyenv global $PYTHON_VERSION
+    pyenv shell $PYTHON_VERSION
+    pip install -U pip setuptools wheel py
+    pip install .
+
+matrix:
+  include:
+    - os: linux
+      language: generic
+      env: PYTHON_VERSION=3.9.0
+    - os: linux
+      language: generic
+      env: PYTHON_VERSION=3.3.2
+    - os: linux
+      language: generic
+      env: PYTHON_VERSION=2.7.16
 
 script: python setup.py test
