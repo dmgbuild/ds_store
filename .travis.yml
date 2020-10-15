@@ -2,9 +2,7 @@ language: python
 
 install:
   - |
-    curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
-    export PATH=~/.pyenv/bin:$PATH
-    eval "$(pyenv init -)"
+    pushd . && cd /opt/pyenv && git pull && popd
     pyenv install --skip-existing $PYTHON_VERSION
     pyenv global $PYTHON_VERSION
     pyenv shell $PYTHON_VERSION
