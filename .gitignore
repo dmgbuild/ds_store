@@ -1,7 +1,12 @@
+.cache
+.coverage
+.eggs
+.tox
+*.egg
+*.egg-info
 *.pyc
 *~
-.cache
-.eggs
-*.egg-info
-*.egg
 build
+coverage.xml
+dist
+venv*
