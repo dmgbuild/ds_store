@@ -1,29 +1,15 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-from __future__ import print_function
-from __future__ import division
-
-import binascii
 import struct
-import mac_alias
-import sys
 
-try:
-    next
-except NameError:
-    next = lambda x: x.next()
-try:
-    unicode
-except NameError:
-    unicode = str
+import mac_alias
+import plistlib
 
 from . import buddy
 
-class ILocCodec(object):
+
+class ILocCodec:
     @staticmethod
     def encode(point):
-        return struct.pack(b'>IIII', point[0], point[1],
-                           0xffffffff, 0xffff0000)
+        return struct.pack(b'>IIII', point[0], point[1], 0xffffffff, 0xffff0000)
 
     @staticmethod
     def decode(bytesData):
@@ -33,30 +19,18 @@ class ILocCodec(object):
             x, y = struct.unpack(b'>II', bytesData[:8])
         return (x, y)
 
-if sys.version_info < (3, 4):
-    import biplist
 
-    class PlistCodec(object):
-        @staticmethod
-        def encode(plist):
-            return biplist.writePlistToString(plist)
+class PlistCodec:
+    @staticmethod
+    def encode(plist):
+        return plistlib.dumps(plist, fmt=plistlib.FMT_BINARY)
 
-        @staticmethod
-        def decode(bytes):
-            return biplist.readPlistFromString(bytes)
-else:
-    import plistlib
+    @staticmethod
+    def decode(bytes):
+        return plistlib.loads(bytes)
 
-    class PlistCodec(object):
-        @staticmethod
-        def encode(plist):
-            return plistlib.dumps(plist, fmt=plistlib.FMT_BINARY)
 
-        @staticmethod
-        def decode(bytes):
-            return plistlib.loads(bytes)
-
-class BookmarkCodec(object):
+class BookmarkCodec:
     @staticmethod
     def encode(bmk):
         return bmk.to_bytes()
@@ -64,6 +38,7 @@ class BookmarkCodec(object):
     @staticmethod
     def decode(bytes):
         return mac_alias.Bookmark.from_bytes(bytes)
+
 
 # This list tells the code how to decode particular kinds of entry in the
 # .DS_Store file.  This is really a convenience, and we currently only
@@ -75,9 +50,10 @@ codecs = {
     b'lsvP': PlistCodec,
     b'icvp': PlistCodec,
     b'pBBk': BookmarkCodec
-    }
+}
 
-class DSStoreEntry(object):
+
+class DSStoreEntry:
     """Holds the data from an entry in a ``.DS_Store`` file.  Note that this is
     not meant to represent the entry itself---i.e. if you change the type
     or value, your changes will *not* be reflected in the underlying file.
@@ -98,7 +74,7 @@ class DSStoreEntry(object):
         self.code = code
         self.type = typecode
         self.value = value
-        
+
     @classmethod
     def read(cls, block):
         """Read a ``.DS_Store`` entry from the containing Block"""
@@ -173,14 +149,14 @@ class DSStoreEntry(object):
             raise TypeError('Can only compare against other DSStoreEntry objects')
         sfl = self.filename.lower()
         ofl = other.filename.lower()
-        
+
         selfCode = self.code
         if str != bytes and type(selfCode) is bytes:
             selfCode = selfCode.decode('utf-8')
         otherCode = other.code
         if str != bytes and type(otherCode) is bytes:
             otherCode = otherCode.decode('utf-8')
-        
+
         return (sfl > ofl or (sfl == ofl and selfCode > otherCode))
 
     def __ge__(self, other):
@@ -192,20 +168,12 @@ class DSStoreEntry(object):
                 or (sfl == ofl
                     and self.code >= other.code))
 
-    def __cmp__(self, other):
-        if not isinstance(other, DSStoreEntry):
-            raise TypeError('Can only compare against other DSStoreEntry objects')
-        r = cmp(self.filename.lower(), other.filename.lower())
-        if r:
-            return r
-        return cmp(self.code, other.code)
-    
     def byte_length(self):
         """Compute the length of this entry, in bytes"""
         utf16 = self.filename.encode('utf-16be')
-        l = 4 + len(utf16) + 8
+        length = 4 + len(utf16) + 8
 
-        if isinstance(self.type, unicode):
+        if isinstance(self.type, str):
             entry_type = self.type.encode('latin_1')
             value = self.value
         elif isinstance(self.type, (bytes, str)):
@@ -214,25 +182,25 @@ class DSStoreEntry(object):
         else:
             entry_type = b'blob'
             value = self.type.encode(self.value)
-            
+
         if entry_type == b'bool':
-            l += 1
+            length += 1
         elif entry_type == b'long' or entry_type == b'shor':
-            l += 4
+            length += 4
         elif entry_type == b'blob':
-            l += 4 + len(value)
+            length += 4 + len(value)
         elif entry_type == b'ustr':
             utf16 = value.encode('utf-16be')
-            l += 4 + len(utf16)
+            length += 4 + len(utf16)
         elif entry_type == b'type':
-            l += 4
+            length += 4
         elif entry_type == b'comp' or entry_type == b'dutc':
-            l += 8
+            length += 8
         else:
             raise ValueError('Unknown type code "%s"' % entry_type)
 
-        return l
-    
+        return length
+
     def write(self, block, insert=False):
         """Write this entry to the specified Block"""
         if insert:
@@ -240,7 +208,7 @@ class DSStoreEntry(object):
         else:
             w = block.write
 
-        if isinstance(self.type, unicode):
+        if isinstance(self.type, str):
             entry_type = self.type.encode('latin_1')
             value = self.value
         elif isinstance(self.type, (bytes, str)):
@@ -267,18 +235,19 @@ class DSStoreEntry(object):
             w(b'>I', len(utf16) // 2)
             w(utf16)
         elif entry_type == b'type':
-            if isinstance(value, unicode):
+            if isinstance(value, str):
                 value = value.encode('latin_1')
             w(b'>4s', value)
         elif entry_type == b'comp' or entry_type == b'dutc':
             w(b'>Q', value)
         else:
             raise ValueError('Unknown type code "%s"' % entry_type)
-    
+
     def __repr__(self):
         return '<%s %s>' % (self.filename, self.code)
 
-class DSStore(object):
+
+class DSStore:
     """Python interface to a ``.DS_Store`` file.  Works by manipulating the file
     on the disk---so this code will work with ``.DS_Store`` files for *very*
     large directories.
@@ -311,8 +280,13 @@ class DSStore(object):
         self._store = store
         self._superblk = self._store['DSDB']
         with self._get_block(self._superblk) as s:
-            self._rootnode, self._levels, self._records, \
-            self._nodes, self._page_size = s.read(b'>IIIII')
+            (
+                self._rootnode,
+                self._levels,
+                self._records,
+                self._nodes,
+                self._page_size
+            ) = s.read(b'>IIIII')
         self._min_usage = 2 * self._page_size // 3
         self._dirty = False
 
@@ -324,15 +298,15 @@ class DSStore(object):
         or "w+" modes, you may also specify a list of entries with which
         to initialise the file."""
         store = buddy.Allocator.open(file_or_name, mode)
-        
+
         if mode == 'w' or mode == 'w+':
             superblk = store.allocate(20)
             store['DSDB'] = superblk
             page_size = 4096
-            
+
             if not initial_entries:
                 root = store.allocate(page_size)
-                
+
                 with store.get_block(root) as rootblk:
                     rootblk.zero_fill()
 
@@ -371,14 +345,14 @@ class DSStore(object):
 
                     if len(nodes) == 1:
                         break
-                    
+
                     current_level = next_level
                     next_level = []
                     ptr_size = 4
 
                 # Allocate nodes
                 ptrs = [store.allocate(page_size) for n in range(node_count)]
-                
+
                 # Generate nodes
                 pointers = []
                 prev_pointers = None
@@ -396,23 +370,23 @@ class DSStore(object):
                         else:
                             next_node = prev_pointers[ppndx + len(node)]
                             node_ptrs = prev_pointers[ppndx:ppndx+len(node)]
-                            
+
                             with store.get_block(ndx) as block:
                                 block.write(b'>II', next_node, len(node))
                                 for ptr, e in zip(node_ptrs, node):
                                     block.write(b'>I', ptr)
                                     e.write(block)
-                            
+
                         pointers.append(ndx)
                     prev_pointers = pointers
                     pointers = []
-                
+
                 root = prev_pointers[0]
 
                 with store.get_block(superblk) as s:
                     s.write(b'>IIIII', root, len(levels), len(initial_entries),
                             node_count, page_size)
-                    
+
         return DSStore(store)
 
     def _get_block(self, number):
@@ -432,17 +406,17 @@ class DSStore(object):
         """Flush dirty data and close the underlying file."""
         self.flush()
         self._store.close()
-        
+
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
-        
+
     # Internal B-Tree nodes look like this:
     #
     # [ next | count | (ptr0 | rec0) | (ptr1 | rec1) ... (ptrN | recN) ]
-    
+
     # Leaf nodes look like this:
     #
     # [ 0 | count | rec0 | rec1 ... recN ]
@@ -484,9 +458,15 @@ class DSStore(object):
 
     # Display the data in the super block
     def _dump_super(self):
-        print('root: %u\nlevels: %u\nrecords: %u\nnodes: %u\npage-size: %u' \
-          % (self._rootnode, self._levels, self._records,
-             self._nodes, self._page_size))
+        print(
+            'root: %u\nlevels: %u\nrecords: %u\nnodes: %u\npage-size: %u' % (
+                self._rootnode,
+                self._levels,
+                self._records,
+                self._nodes,
+                self._page_size
+            )
+        )
 
     # Splits entries across two blocks, returning one pivot
     #
@@ -494,9 +474,9 @@ class DSStore(object):
     def _split2(self, blocks, entries, pointers, before, internal):
         left_block = blocks[0]
         right_block = blocks[1]
-        
+
         count = len(entries)
-        
+
         # Find the feasible splits
         best_split = None
         best_diff = None
@@ -506,7 +486,7 @@ class DSStore(object):
             # We can use a *single* node for this
             best_split = count
         else:
-            # Split into two nodes  
+            # Split into two nodes
             for n in range(1, count - 1):
                 left_size = 8 + before[n]
                 right_size = 8 + total - before[n + 1]
@@ -515,7 +495,7 @@ class DSStore(object):
                     break
                 if right_size > self._page_size:
                     continue
-                
+
                 diff = abs(left_size - right_size)
 
                 if best_split is None or diff < best_diff:
@@ -524,7 +504,7 @@ class DSStore(object):
 
         if best_split is None:
             return None
-        
+
         # Write the nodes
         left_block.seek(0)
         if internal:
@@ -542,7 +522,7 @@ class DSStore(object):
 
         if best_split == count:
             return []
-        
+
         right_block.seek(0)
         if internal:
             next_node = pointers[count]
@@ -556,21 +536,20 @@ class DSStore(object):
             entries[n].write(right_block)
 
         right_block.zero_fill()
-            
+
         pivot = entries[best_split]
 
         return [pivot]
-    
+
     def _split(self, node, entry, right_ptr=0):
         self._nodes += 1
         self._dirty = True
         new_right = self._store.allocate(self._page_size)
-        with self._get_block(node) as block, \
-            self._get_block(new_right) as right_block:
+        with self._get_block(node) as block, self._get_block(new_right) as right_block:
 
             # First, measure and extract all the elements
             entry_size = entry.byte_length()
-            entry_pos = None
+            # entry_pos = None
             next_node, count = block.read(b'>II')
             if next_node:
                 entry_size += 4
@@ -585,7 +564,7 @@ class DSStore(object):
                     pointers.append(ptr)
                 e = DSStoreEntry.read(block)
                 if e > entry:
-                    entry_pos = n
+                    # entry_pos = n
                     entries.append(entry)
                     pointers.append(right_ptr)
                     before.append(total)
@@ -600,7 +579,7 @@ class DSStore(object):
             pivot = self._split2([block, right_block],
                                  entries, pointers, before,
                                  bool(next_node))[0]
-            
+
             self._records += 1
             self._nodes += 1
             self._dirty = True
@@ -683,14 +662,14 @@ class DSStore(object):
         with self._get_block(node) as block:
             next_node, count = block.read(b'>II')
             insert_pos = None
-            insert_ndx = None
+            # insert_ndx = None
             n = 0
             while n < count:
                 pos = block.tell()
                 e = DSStoreEntry.read(block)
                 if e == entry:
                     insert_pos = pos
-                    insert_ndx = n
+                    # insert_ndx = n
                     block.seek(pos)
                     block.delete(e.byte_length())
                     count -= 1
@@ -699,11 +678,11 @@ class DSStore(object):
                     continue
                 elif insert_pos is None and e > entry:
                     insert_pos = pos
-                    insert_ndx = n
+                    # insert_ndx = n
                 n += 1
             if insert_pos is None:
                 insert_pos = block.tell()
-                insert_ndx = count
+                # insert_ndx = count
             remaining = self._page_size - block.tell()
 
             if remaining < entry.byte_length():
@@ -753,8 +732,8 @@ class DSStore(object):
 
             for n in range(count):
                 if next_node:
-                    ptr = block.read(b'>I')[0]
-                e = DSStoreEntry.read(block)
+                    block.read(b'>I')[0]
+                DSStoreEntry.read(block)
 
             used = block.tell()
 
@@ -787,14 +766,14 @@ class DSStore(object):
                     continue
 
                 diff = abs(left_size - mid_size) * abs(right_size - mid_size)
-                
+
                 if best_split is None or diff < best_diff:
                     best_split = (n, m, count)
                     best_diff = diff
 
         if best_split is None:
             return None
-        
+
         # Write the nodes
         prev_split = -1
         for block, split in zip(blocks, best_split):
@@ -811,7 +790,7 @@ class DSStore(object):
                 entries[n].write(block)
 
             block.zero_fill()
-            
+
             prev_split = split
 
         return (entries[best_split[0]], entries[best_split[1]])
@@ -825,7 +804,7 @@ class DSStore(object):
         before = []
         total = 0
         ppivots = pivots + [None]
-        for b,p in zip(blocks, ppivots):
+        for b, p in zip(blocks, ppivots):
             b.seek(0)
             next_node, count = b.read(b'>II')
             for n in range(count):
@@ -857,7 +836,7 @@ class DSStore(object):
 
         with self._get_block(node) as block:
             next_node, count = block.read(b'>II')
-            
+
             with self._get_block(path[-1]) as parent:
                 # Find the left and right siblings and respective pivots
                 parent_next, parent_count = parent.read(b'>II')
@@ -884,7 +863,7 @@ class DSStore(object):
                         right_node = ptr
                         right_pos = pos
                         break
-                
+
                     prev_e = e
                     prev_ptr = ptr
                     prev_pos = pos
@@ -898,24 +877,24 @@ class DSStore(object):
                     right_node = parent_next
                     right_pos = parent.tell()
 
-                parent_used = parent.tell()
-            
+                _ = parent.tell()
+
             if left_node and right_node:
-                with self._get_block(left_node) as left, \
-                    self._get_block(right_node) as right:
+                with self._get_block(left_node) as left, self._get_block(right_node) as right:
                     blocks = [left, block, right]
                     pivots = [left_pivot, right_pivot]
-                    
+
                     entries, pointers, before = self._extract(blocks, pivots)
 
                     # If there's a chance that we could use two pages instead
                     # of three, go for it
-                    pivots = self._split2(blocks, entries, pointers,
-                                           before, bool(next_node))
+                    pivots = self._split2(
+                        blocks, entries, pointers, before, bool(next_node)
+                    )
                     if pivots is None:
                         ptrs = [left_node, node, right_node]
-                        pivots = self._split3(blocks, entries, pointers,
-                                               before, bool(next_node))
+                        pivots = self._split3(
+                            blocks, entries, pointers, before, bool(next_node))
                     else:
                         if pivots:
                             ptrs = [left_node, node]
@@ -927,7 +906,7 @@ class DSStore(object):
                         self._store.release(right_node)
                         self._nodes -= 1
                         self._dirty = True
-                        
+
                     # Remove the pivots from the parent
                     with self._get_block(path[-1]) as parent:
                         if right_node == parent_next:
@@ -941,9 +920,9 @@ class DSStore(object):
                         parent_count -= 2
                         parent.write(b'>II', parent_next, parent_count)
                         self._records -= 2
-                        
+
                     # Replace with those in pivots
-                    for e,rp in zip(pivots, ptrs[1:]):
+                    for e, rp in zip(pivots, ptrs[1:]):
                         self._insert_inner(path[:-1], path[-1], e, rp)
             elif left_node:
                 with self._get_block(left_node) as left:
@@ -952,8 +931,9 @@ class DSStore(object):
 
                     entries, pointers, before = self._extract(blocks, pivots)
 
-                    pivots = self._split2(blocks, entries, pointers,
-                                           before, bool(next_node))
+                    pivots = self._split2(
+                        blocks, entries, pointers, before, bool(next_node)
+                    )
 
                     # Remove the pivot from the parent
                     with self._get_block(path[-1]) as parent:
@@ -979,8 +959,9 @@ class DSStore(object):
 
                     entries, pointers, before = self._extract(blocks, pivots)
 
-                    pivots = self._split2(blocks, entries, pointers,
-                                           before, bool(next_node))
+                    pivots = self._split2(
+                        blocks, entries, pointers, before, bool(next_node)
+                    )
 
                     # Remove the pivot from the parent
                     with self._get_block(path[-1]) as parent:
@@ -1008,7 +989,7 @@ class DSStore(object):
             self._rootnode = node
         else:
             count, used = self._block_usage(path[-1])
-    
+
             if used < self._page_size // 2:
                 self._rebalance(path[:-1], path[-1])
 
@@ -1016,31 +997,33 @@ class DSStore(object):
     # lower-cased.
     def _delete_leaf(self, node, filename_lc, code):
         found = False
-        
+
         with self._get_block(node) as block:
             next_node, count = block.read(b'>II')
 
             for n in range(count):
                 pos = block.tell()
                 e = DSStoreEntry.read(block)
-                if e.filename.lower() == filename_lc \
-                  and (code is None or e.code == code):
+                if (
+                    e.filename.lower() == filename_lc
+                    and (code is None or e.code == code)
+                ):
                     block.seek(pos)
                     block.delete(e.byte_length())
                     found = True
-                    
+
                     # This does not affect the loop; THIS IS NOT A BUG
                     count -= 1
 
                     self._records -= 1
                     self._dirty = True
-                    
+
             if found:
                 used = block.tell()
-                
+
                 block.seek(0)
                 block.write(b'>II', next_node, count)
-            
+
                 return used < self._page_size // 2
             else:
                 return False
@@ -1078,7 +1061,7 @@ class DSStore(object):
     # Delete an entry from an inner node, `node'
     def _delete_inner(self, path, node, filename_lc, code):
         rebalance = False
-        
+
         with self._get_block(node) as block:
             next_node, count = block.read(b'>II')
 
@@ -1086,8 +1069,10 @@ class DSStore(object):
                 pos = block.tell()
                 ptr = block.read(b'>I')[0]
                 e = DSStoreEntry.read(block)
-                if e.filename.lower() == filename_lc \
-                  and (code is None or e.code == code):
+                if (
+                    e.filename.lower() == filename_lc
+                    and (code is None or e.code == code)
+                ):
                     # Take the largest from the left subtree
                     rebalance, largest = self._take_largest(path, ptr)
 
@@ -1099,7 +1084,7 @@ class DSStore(object):
                     else:
                         right_ptr = block.read(b'>I')[0]
                         block.seek(pos + 4)
-                        
+
                     block.delete(e.byte_length() + 4)
 
                     count -= 1
@@ -1108,9 +1093,9 @@ class DSStore(object):
 
                     self._records -= 1
                     self._dirty = True
-                    
+
                     break
-                    
+
         # Replace the pivot value
         self._insert_inner(path, node, largest, right_ptr)
 
@@ -1129,7 +1114,7 @@ class DSStore(object):
 
         # If we're deleting *every* node for "filename", we must recurse
         if code is None:
-            ###TODO: Fix this so we can do bulk deletes
+            # TODO: Fix this so we can do bulk deletes
             raise ValueError('You must delete items individually.  Sorry')
 
         # Otherwise, we're deleting *one* specific node
@@ -1144,8 +1129,10 @@ class DSStore(object):
                         ptr = block.read(b'>I')[0]
                         e = DSStoreEntry.read(block)
                         e_lc = e.filename.lower()
-                        if filename_lc < e_lc \
-                            or (filename_lc == e_lc and code < e.code):
+                        if (
+                            filename_lc < e_lc
+                            or (filename_lc == e_lc and code < e.code)
+                        ):
                             next_node = ptr
                             break
                         elif filename_lc == e_lc and code == e.code:
@@ -1190,7 +1177,7 @@ class DSStore(object):
                             yield e
                         elif code < e.code:
                             return
-                        
+
     def find(self, filename, code=None):
         """Returns a generator that will iterate over matching entries in
         the B-Tree."""
@@ -1199,7 +1186,7 @@ class DSStore(object):
             filename = filename.filename
 
         filename_lc = filename.lower()
-        
+
         return self._find(self._rootnode, filename_lc, code)
 
     def __len__(self):
@@ -1208,7 +1195,7 @@ class DSStore(object):
     def __iter__(self):
         return self._traverse(self._rootnode)
 
-    class Partial(object):
+    class Partial:
         """This is used to implement indexing."""
         def __init__(self, store, filename):
             self._store = store
@@ -1227,11 +1214,11 @@ class DSStore(object):
                 raise KeyError('no such key - [%s][%s]' % (self._filename,
                                code))
 
-            if not isinstance(item.type, (bytes, str, unicode)):
+            if not isinstance(item.type, (bytes, str)):
                 return item.value
-            
+
             return (item.type, item.value)
-            
+
         def __setitem__(self, code, value):
             if code is None:
                 raise KeyError('bad key - [%s][None]' % self._filename)
@@ -1246,9 +1233,10 @@ class DSStore(object):
             else:
                 entry_type = value[0]
                 entry_value = value[1]
-            
-            self._store.insert(DSStoreEntry(self._filename, code,
-                                             entry_type, entry_value))
+
+            self._store.insert(
+                DSStoreEntry(self._filename, code, entry_type, entry_value)
+            )
 
         def __delitem__(self, code):
             if code is None:
@@ -1262,4 +1250,3 @@ class DSStore(object):
 
     def __getitem__(self, filename):
         return self.Partial(self, filename)
-    

@@ -14,13 +14,17 @@ import argparse
 import pprint
 
 _not_printable_re = re.compile(rb'[\x00-\x1f\x7f-\x9f]')
+
+
 def usage():
     print(main.__doc__)
     sys.exit(0)
 
+
 def chunks(iterable, length):
     for i in range(0, len(iterable), length):
         yield i, iterable[i:i+length]
+
 
 def pretty(value):
     if isinstance(value, dict):
@@ -40,6 +44,7 @@ def pretty(value):
     else:
         return value
 
+
 def main(argv):
     """Display the contents of the .DS_Store file at the specified path.
     If you specify just a directory, ds_store will inspect the .DS_Store
@@ -51,7 +56,7 @@ def main(argv):
     args = parser.parse_args(argv)
 
     if len(args.paths) == 0:
-        args.paths = [ '.' ]
+        args.paths = ['.']
 
     failed = False
     for path in args.paths:
@@ -85,6 +90,7 @@ def main(argv):
 
     if failed:
         sys.exit(1)
+
 
 if __name__ == '__main__':
     main(sys.argv[1:])

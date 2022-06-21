@@ -1,23 +1,14 @@
-# -*- coding: utf-8 -*-
 import os
 import bisect
 import struct
 import binascii
 
-try:
-    {}.iterkeys
-    iterkeys = lambda x: x.iterkeys()
-except AttributeError:
-    iterkeys = lambda x: x.keys()
-try:
-    unicode
-except NameError:
-    unicode = str
 
 class BuddyError(Exception):
     pass
 
-class Block(object):
+
+class Block:
     def __init__(self, allocator, offset, size):
         self._allocator = allocator
         self._offset = offset
@@ -25,7 +16,7 @@ class Block(object):
         self._value = bytearray(allocator.read(offset, size))
         self._pos = 0
         self._dirty = False
-        
+
     def __len__(self):
         return self._size
 
@@ -34,7 +25,7 @@ class Block(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
-    
+
     def close(self):
         if self._dirty:
             self.flush()
@@ -46,13 +37,13 @@ class Block(object):
 
     def invalidate(self):
         self._dirty = False
-        
+
     def zero_fill(self):
         len = self._size - self._pos
         zeroes = b'\0' * len
         self._value[self._pos:self._size] = zeroes
         self._dirty = True
-        
+
     def tell(self):
         return self._pos
 
@@ -68,7 +59,7 @@ class Block(object):
         self._pos = pos
 
     def read(self, size_or_format):
-        if isinstance(size_or_format, (str, unicode, bytes)):
+        if isinstance(size_or_format, (str, bytes)):
             size = struct.calcsize(size_or_format)
             fmt = size_or_format
         else:
@@ -80,7 +71,7 @@ class Block(object):
 
         data = self._value[self._pos:self._pos + size]
         self._pos += size
-        
+
         if fmt is not None:
             if isinstance(data, bytearray):
                 return struct.unpack_from(fmt, bytes(data))
@@ -100,7 +91,7 @@ class Block(object):
 
         self._value[self._pos:self._pos + len(data)] = data
         self._pos += len(data)
-        
+
         self._dirty = True
 
     def insert(self, data_or_format, *args):
@@ -121,20 +112,27 @@ class Block(object):
         del self._value[self._pos:self._pos + size]
         self._value += b'\0' * size
         self._dirty = True
-        
+
     def __str__(self):
         return binascii.b2a_hex(self._value)
-        
-class Allocator(object):
+
+
+class Allocator:
     def __init__(self, the_file):
         self._file = the_file
         self._dirty = False
 
         self._file.seek(0)
-        
+
         # Read the header
-        magic1, magic2, offset, size, offset2, self._unknown1 \
-          = self.read(-4, '>I4sIII16s')
+        (
+            magic1,
+            magic2,
+            offset,
+            size,
+            offset2,
+            self._unknown1
+        ) = self.read(-4, '>I4sIII16s')
 
         if magic2 != b'Bud1' or magic1 != 1:
             raise BuddyError('Not a buddy file')
@@ -152,7 +150,7 @@ class Allocator(object):
             self._offsets += self._root.read('>256I')
             c -= 256
         self._offsets = self._offsets[:count]
-        
+
         # Read the TOC
         self._toc = {}
         count = self._root.read('>I')[0]
@@ -167,11 +165,11 @@ class Allocator(object):
         for n in range(32):
             count = self._root.read('>I')
             self._free.append(list(self._root.read('>%uI' % count)))
-        
+
     @classmethod
     def open(cls, file_or_name, mode='r+'):
-        if isinstance(file_or_name, (str, unicode)):
-            if not 'b' in mode:
+        if isinstance(file_or_name, str):
+            if 'b' not in mode:
                 mode = mode[:1] + 'b' + mode[1:]
             f = open(file_or_name, mode)
         else:
@@ -180,7 +178,7 @@ class Allocator(object):
         if 'w' in mode:
             # Create an empty file in this case
             f.truncate()
-            
+
             # An empty root block needs 1264 bytes:
             #
             #     0  4       offset count
@@ -190,7 +188,7 @@ class Allocator(object):
             #  1032  4       toc count (0)
             #  1036  228     free list
             #  total 1264
-            
+
             # The free list will contain the following:
             #
             #     0  5 * 4   no blocks of width less than 5
@@ -217,7 +215,7 @@ class Allocator(object):
                                  b'\x00\x00\x00\x00')
             f.write(header)
             f.write(b'\0' * 2016)
-            
+
             # Write the root block
             free_list = [struct.pack(b'>5I', 0, 0, 0, 0, 0)]
             for n in range(5, 11):
@@ -226,7 +224,7 @@ class Allocator(object):
             for n in range(12, 31):
                 free_list.append(struct.pack(b'>II', 1, 2**n))
             free_list.append(struct.pack(b'>I', 0))
-            
+
             root = b''.join([struct.pack(b'>III', 1, 0, 2048 | 5),
                             struct.pack(b'>I', 0) * 255,
                             struct.pack(b'>I', 0)] + free_list)
@@ -239,7 +237,7 @@ class Allocator(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
-    
+
     def close(self):
         self.flush()
         self._file.close()
@@ -262,9 +260,9 @@ class Allocator(object):
                                          self._unknown1))
 
             self._dirty = False
-            
+
         self._file.flush()
-            
+
     def read(self, offset, size_or_format):
         """Read data at `offset', or raise an exception.  `size_or_format'
            may either be a byte count, in which case we return raw data,
@@ -273,13 +271,13 @@ class Allocator(object):
         # N.B. There is a fixed offset of four bytes(!)
         self._file.seek(offset + 4, os.SEEK_SET)
 
-        if isinstance(size_or_format, (str, unicode)):
+        if isinstance(size_or_format, str):
             size = struct.calcsize(size_or_format)
             fmt = size_or_format
         else:
             size = size_or_format
             fmt = None
-        
+
         ret = self._file.read(size)
         if len(ret) < size:
             ret += b'\0' * (size - len(ret))
@@ -289,7 +287,7 @@ class Allocator(object):
                 ret = struct.unpack_from(fmt, bytes(ret))
             else:
                 ret = struct.unpack(fmt, ret)
-            
+
         return ret
 
     def write(self, offset, data_or_format, *args):
@@ -317,7 +315,7 @@ class Allocator(object):
         size = 1 << (addr & 0x1f)
 
         return Block(self, offset, size)
-    
+
     def _root_block_size(self):
         """Return the number of bytes required by the root block."""
         # Offsets
@@ -330,7 +328,7 @@ class Allocator(object):
 
         # Free list
         size += sum([4 + 4 * len(fl) for fl in self._free])
-        
+
         return size
 
     def _write_root_block_into(self, block):
@@ -360,32 +358,32 @@ class Allocator(object):
     def _buddy(self, offset, width):
         f = self._free[width]
         b = offset ^ (1 << width)
-        
+
         try:
             ndx = f.index(b)
         except ValueError:
             ndx = None
-            
+
         return (f, b, ndx)
 
     def _release(self, offset, width):
         # Coalesce
         while True:
-            f,b,ndx = self._buddy(offset, width)
+            f, b, ndx = self._buddy(offset, width)
 
             if ndx is None:
                 break
-            
+
             offset &= b
             width += 1
             del f[ndx]
-            
+
         # Add to the list
         bisect.insort(f, offset)
 
         # Mark as dirty
         self._dirty = True
-    
+
     def _alloc(self, width):
         w = width
         while not self._free[w]:
@@ -407,13 +405,13 @@ class Allocator(object):
             except ValueError:
                 block = len(self._offsets)
                 self._offsets.append(0)
-        
+
         # Compute block width
         width = max(bytes.bit_length(), 5)
 
         addr = self._offsets[block]
         offset = addr & ~0x1f
-        
+
         if addr:
             blkwidth = addr & 0x1f
             if blkwidth == width:
@@ -424,7 +422,7 @@ class Allocator(object):
         offset = self._alloc(width)
         self._offsets[block] = offset | width
         return block
-    
+
     def release(self, block):
         addr = self._offsets[block]
 
@@ -442,14 +440,14 @@ class Allocator(object):
         return len(self._toc)
 
     def __getitem__(self, key):
-        if not isinstance(key, (str, unicode)):
+        if not isinstance(key, str):
             raise TypeError('Keys must be of string type')
         if not isinstance(key, bytes):
             key = key.encode('latin_1')
         return self._toc[key]
 
     def __setitem__(self, key, value):
-        if not isinstance(key, (str, unicode)):
+        if not isinstance(key, str):
             raise TypeError('Keys must be of string type')
         if not isinstance(key, bytes):
             key = key.encode('latin_1')
@@ -457,7 +455,7 @@ class Allocator(object):
         self._dirty = True
 
     def __delitem__(self, key):
-        if not isinstance(key, (str, unicode)):
+        if not isinstance(key, str):
             raise TypeError('Keys must be of string type')
         if not isinstance(key, bytes):
             key = key.encode('latin_1')
@@ -465,14 +463,13 @@ class Allocator(object):
         self._dirty = True
 
     def iterkeys(self):
-        return iterkeys(self._toc)
+        return self._toc.keys()
 
     def keys(self):
-        return iterkeys(self._toc)
+        return self._toc.keys()
 
     def __iter__(self):
-        return iterkeys(self._toc)
+        return self._toc.keys()
 
     def __contains__(self, key):
         return key in self._toc
-
