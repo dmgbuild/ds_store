@@ -15,10 +15,10 @@ ds_store
    :alt: Maturity
 
 .. image:: https://img.shields.io/pypi/l/ds_store.svg
-   :target: https://github.com/dmgbuild/ds_store/blob/master/LICENSE
+   :target: https://github.com/dmgbuild/ds_store/blob/main/LICENSE
    :alt: MIT License
 
-.. image:: https://github.com/dmgbuild/ds_store/workflows/CI/badge.svg?branch=master
+.. image:: https://github.com/dmgbuild/ds_store/workflows/CI/badge.svg?branch=main
    :target: https://github.com/dmgbuild/ds_store/actions
    :alt: Build Status
 
