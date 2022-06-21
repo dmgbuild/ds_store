@@ -2,11 +2,29 @@
 ds_store
 ========
 
-.. image:: https://travis-ci.org/al45tair/ds_store.svg?branch=master
-    :target: https://travis-ci.org/al45tair/ds_store
+.. image:: https://img.shields.io/pypi/pyversions/ds_store.svg
+   :target: https://pypi.python.org/pypi/ds_store
+   :alt: Python Versions
+
+.. image:: https://img.shields.io/pypi/v/ds_store.svg
+   :target: https://pypi.python.org/pypi/ds_store
+   :alt: PyPI Version
+
+.. image:: https://img.shields.io/pypi/status/ds_store.svg
+   :target: https://pypi.python.org/pypi/ds_store
+   :alt: Maturity
+
+.. image:: https://img.shields.io/pypi/l/ds_store.svg
+   :target: https://github.com/al45tair/ds_store/blob/master/LICENSE
+   :alt: MIT License
+
+.. image:: https://github.com/al45tair/ds_store/workflows/CI/badge.svg?branch=master
+   :target: https://github.com/al45tair/ds_store/actions
+   :alt: Build Status
 
 .. image:: https://readthedocs.org/projects/ds_store/badge/?version=latest
-    :target: http://ds_store.readthedocs.io/en/latest/?badge=latest
+   :target: http://ds_store.readthedocs.io/en/latest/?badge=latest
+   :alt: Docs Build Status
 
 What is this?
 -------------
