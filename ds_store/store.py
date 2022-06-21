@@ -636,7 +636,7 @@ class DSStore(object):
                     if n == count - 1:
                         right_ptr = next_node
                         next_node = ptr
-                        block_seek(pos)
+                        block.seek(pos)
                     else:
                         right_ptr = block.read(b'>I')[0]
                         block.seek(pos + 4)
