@@ -2,6 +2,7 @@
 .coverage
 .eggs
 .tox
+.vscode
 *.egg
 *.egg-info
 *.pyc
@@ -9,5 +10,5 @@
 build
 coverage.xml
 dist
-venv*
 docs/_build
+venv*

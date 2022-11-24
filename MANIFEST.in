@@ -1,5 +1,6 @@
 include *.ini
 include pyproject.toml
+include .pre-commit-config.yaml
 include .readthedocs.yaml
 include tests/Test_DS_Store
 recursive-include docs *.bat

@@ -1,7 +1,7 @@
-import os
-import bisect
-import struct
 import binascii
+import bisect
+import os
+import struct
 
 
 class BuddyError(Exception):
@@ -40,8 +40,8 @@ class Block:
 
     def zero_fill(self):
         len = self._size - self._pos
-        zeroes = b'\0' * len
-        self._value[self._pos:self._size] = zeroes
+        zeroes = b"\0" * len
+        self._value[self._pos : self._size] = zeroes
         self._dirty = True
 
     def tell(self):
@@ -54,7 +54,7 @@ class Block:
             pos = self._size - pos
 
         if pos < 0 or pos > self._size:
-            raise ValueError('Seek out of range in Block instance')
+            raise ValueError("Seek out of range in Block instance")
 
         self._pos = pos
 
@@ -67,9 +67,9 @@ class Block:
             fmt = None
 
         if self._size - self._pos < size:
-            raise BuddyError('Unable to read %lu bytes in block' % size)
+            raise BuddyError("Unable to read %lu bytes in block" % size)
 
-        data = self._value[self._pos:self._pos + size]
+        data = self._value[self._pos : self._pos + size]
         self._pos += size
 
         if fmt is not None:
@@ -87,9 +87,9 @@ class Block:
             data = data_or_format
 
         if self._pos + len(data) > self._size:
-            raise ValueError('Attempt to write past end of Block')
+            raise ValueError("Attempt to write past end of Block")
 
-        self._value[self._pos:self._pos + len(data)] = data
+        self._value[self._pos : self._pos + len(data)] = data
         self._pos += len(data)
 
         self._dirty = True
@@ -100,17 +100,17 @@ class Block:
         else:
             data = data_or_format
 
-        del self._value[-len(data):]
-        self._value[self._pos:self._pos] = data
+        del self._value[-len(data) :]
+        self._value[self._pos : self._pos] = data
         self._pos += len(data)
 
         self._dirty = True
 
     def delete(self, size):
         if self._pos + size > self._size:
-            raise ValueError('Attempt to delete past end of Block')
-        del self._value[self._pos:self._pos + size]
-        self._value += b'\0' * size
+            raise ValueError("Attempt to delete past end of Block")
+        del self._value[self._pos : self._pos + size]
+        self._value += b"\0" * size
         self._dirty = True
 
     def __str__(self):
@@ -125,57 +125,52 @@ class Allocator:
         self._file.seek(0)
 
         # Read the header
-        (
-            magic1,
-            magic2,
-            offset,
-            size,
-            offset2,
-            self._unknown1
-        ) = self.read(-4, '>I4sIII16s')
+        (magic1, magic2, offset, size, offset2, self._unknown1) = self.read(
+            -4, ">I4sIII16s"
+        )
 
-        if magic2 != b'Bud1' or magic1 != 1:
-            raise BuddyError('Not a buddy file')
+        if magic2 != b"Bud1" or magic1 != 1:
+            raise BuddyError("Not a buddy file")
 
         if offset != offset2:
-            raise BuddyError('Root addresses differ')
+            raise BuddyError("Root addresses differ")
 
         self._root = Block(self, offset, size)
 
         # Read the block offsets
-        count, self._unknown2 = self._root.read('>II')
+        count, self._unknown2 = self._root.read(">II")
         self._offsets = []
         c = (count + 255) & ~255
         while c:
-            self._offsets += self._root.read('>256I')
+            self._offsets += self._root.read(">256I")
             c -= 256
         self._offsets = self._offsets[:count]
 
         # Read the TOC
         self._toc = {}
-        count = self._root.read('>I')[0]
+        count = self._root.read(">I")[0]
         for n in range(count):
-            nlen = self._root.read('B')[0]
+            nlen = self._root.read("B")[0]
             name = bytes(self._root.read(nlen))
-            value = self._root.read('>I')[0]
+            value = self._root.read(">I")[0]
             self._toc[name] = value
 
         # Read the free lists
         self._free = []
         for n in range(32):
-            count = self._root.read('>I')
-            self._free.append(list(self._root.read('>%uI' % count)))
+            count = self._root.read(">I")
+            self._free.append(list(self._root.read(">%uI" % count)))
 
     @classmethod
-    def open(cls, file_or_name, mode='r+'):
+    def open(cls, file_or_name, mode="r+"):
         if isinstance(file_or_name, str):
-            if 'b' not in mode:
-                mode = mode[:1] + 'b' + mode[1:]
+            if "b" not in mode:
+                mode = mode[:1] + "b" + mode[1:]
             f = open(file_or_name, mode)
         else:
             f = file_or_name
 
-        if 'w' in mode:
+        if "w" in mode:
             # Create an empty file in this case
             f.truncate()
 
@@ -206,28 +201,38 @@ class Allocator:
             #  located at offset 2**n where n is its width.)
 
             # Write the header
-            header = struct.pack(b'>I4sIII16s',
-                                 1, b'Bud1',
-                                 2048, 1264, 2048,
-                                 b'\x00\x00\x10\x0c'
-                                 b'\x00\x00\x00\x87'
-                                 b'\x00\x00\x20\x0b'
-                                 b'\x00\x00\x00\x00')
+            header = struct.pack(
+                b">I4sIII16s",
+                1,
+                b"Bud1",
+                2048,
+                1264,
+                2048,
+                b"\x00\x00\x10\x0c"
+                b"\x00\x00\x00\x87"
+                b"\x00\x00\x20\x0b"
+                b"\x00\x00\x00\x00",
+            )
             f.write(header)
-            f.write(b'\0' * 2016)
+            f.write(b"\0" * 2016)
 
             # Write the root block
-            free_list = [struct.pack(b'>5I', 0, 0, 0, 0, 0)]
+            free_list = [struct.pack(b">5I", 0, 0, 0, 0, 0)]
             for n in range(5, 11):
-                free_list.append(struct.pack(b'>II', 1, 2**n))
-            free_list.append(struct.pack(b'>I', 0))
+                free_list.append(struct.pack(b">II", 1, 2**n))
+            free_list.append(struct.pack(b">I", 0))
             for n in range(12, 31):
-                free_list.append(struct.pack(b'>II', 1, 2**n))
-            free_list.append(struct.pack(b'>I', 0))
+                free_list.append(struct.pack(b">II", 1, 2**n))
+            free_list.append(struct.pack(b">I", 0))
 
-            root = b''.join([struct.pack(b'>III', 1, 0, 2048 | 5),
-                            struct.pack(b'>I', 0) * 255,
-                            struct.pack(b'>I', 0)] + free_list)
+            root = b"".join(
+                [
+                    struct.pack(b">III", 1, 0, 2048 | 5),
+                    struct.pack(b">I", 0) * 255,
+                    struct.pack(b">I", 0),
+                ]
+                + free_list
+            )
             f.write(root)
 
         return Allocator(f)
@@ -250,24 +255,28 @@ class Allocator:
                 self._write_root_block_into(rblk)
 
             addr = self._offsets[0]
-            offset = addr & ~0x1f
-            size = 1 << (addr & 0x1f)
+            offset = addr & ~0x1F
+            size = 1 << (addr & 0x1F)
 
             self._file.seek(0, os.SEEK_SET)
-            self._file.write(struct.pack(b'>I4sIII16s',
-                                         1, b'Bud1',
-                                         offset, size, offset,
-                                         self._unknown1))
+            self._file.write(
+                struct.pack(
+                    b">I4sIII16s", 1, b"Bud1", offset, size, offset, self._unknown1
+                )
+            )
 
             self._dirty = False
 
         self._file.flush()
 
     def read(self, offset, size_or_format):
-        """Read data at `offset', or raise an exception.  `size_or_format'
-           may either be a byte count, in which case we return raw data,
-           or a format string for `struct.unpack', in which case we
-           work out the size and unpack the data before returning it."""
+        """Read data at `offset', or raise an exception.
+
+        `size_or_format' may either be a byte count, in which case we
+        return raw data, or a format string for `struct.unpack', in
+        which case we work out the size and unpack the data before
+        returning it.
+        """
         # N.B. There is a fixed offset of four bytes(!)
         self._file.seek(offset + 4, os.SEEK_SET)
 
@@ -280,7 +289,7 @@ class Allocator:
 
         ret = self._file.read(size)
         if len(ret) < size:
-            ret += b'\0' * (size - len(ret))
+            ret += b"\0" * (size - len(ret))
 
         if fmt is not None:
             if isinstance(ret, bytearray):
@@ -291,10 +300,12 @@ class Allocator:
         return ret
 
     def write(self, offset, data_or_format, *args):
-        """Write data at `offset', or raise an exception.  `data_or_format'
-           may either be the data to write, or a format string for `struct.pack',
-           in which case we pack the additional arguments and write the
-           resulting data."""
+        """Write data at `offset', or raise an exception.
+
+        `data_or_format' may either be the data to write, or a format
+        string for `struct.pack', in which case we pack the additional
+        arguments and write the resulting data.
+        """
         # N.B. There is a fixed offset of four bytes(!)
         self._file.seek(offset + 4, os.SEEK_SET)
 
@@ -311,8 +322,8 @@ class Allocator:
         except IndexError:
             return None
 
-        offset = addr & ~0x1f
-        size = 1 << (addr & 0x1f)
+        offset = addr & ~0x1F
+        size = 1 << (addr & 0x1F)
 
         return Block(self, offset, size)
 
@@ -333,27 +344,27 @@ class Allocator:
 
     def _write_root_block_into(self, block):
         # Offsets
-        block.write('>II', len(self._offsets), self._unknown2)
-        block.write('>%uI' % len(self._offsets), *self._offsets)
+        block.write(">II", len(self._offsets), self._unknown2)
+        block.write(">%uI" % len(self._offsets), *self._offsets)
         extra = len(self._offsets) & 255
         if extra:
-            block.write(b'\0\0\0\0' * (256 - extra))
+            block.write(b"\0\0\0\0" * (256 - extra))
 
         # TOC
         keys = list(self._toc.keys())
         keys.sort()
 
-        block.write('>I', len(keys))
+        block.write(">I", len(keys))
         for k in keys:
-            block.write('B', len(k))
+            block.write("B", len(k))
             block.write(k)
-            block.write('>I', self._toc[k])
+            block.write(">I", self._toc[k])
 
         # Free list
         for w, f in enumerate(self._free):
-            block.write('>I', len(f))
+            block.write(">I", len(f))
             if len(f):
-                block.write('>%uI' % len(f), *f)
+                block.write(">%uI" % len(f), *f)
 
     def _buddy(self, offset, width):
         f = self._free[width]
@@ -410,10 +421,10 @@ class Allocator:
         width = max(bytes.bit_length(), 5)
 
         addr = self._offsets[block]
-        offset = addr & ~0x1f
+        offset = addr & ~0x1F
 
         if addr:
-            blkwidth = addr & 0x1f
+            blkwidth = addr & 0x1F
             if blkwidth == width:
                 return block
             self._release(offset, width)
@@ -427,8 +438,8 @@ class Allocator:
         addr = self._offsets[block]
 
         if addr:
-            width = addr & 0x1f
-            offset = addr & ~0x1f
+            width = addr & 0x1F
+            offset = addr & ~0x1F
             self._release(offset, width)
 
         if block == len(self._offsets):
@@ -441,24 +452,24 @@ class Allocator:
 
     def __getitem__(self, key):
         if not isinstance(key, str):
-            raise TypeError('Keys must be of string type')
+            raise TypeError("Keys must be of string type")
         if not isinstance(key, bytes):
-            key = key.encode('latin_1')
+            key = key.encode("latin_1")
         return self._toc[key]
 
     def __setitem__(self, key, value):
         if not isinstance(key, str):
-            raise TypeError('Keys must be of string type')
+            raise TypeError("Keys must be of string type")
         if not isinstance(key, bytes):
-            key = key.encode('latin_1')
+            key = key.encode("latin_1")
         self._toc[key] = value
         self._dirty = True
 
     def __delitem__(self, key):
         if not isinstance(key, str):
-            raise TypeError('Keys must be of string type')
+            raise TypeError("Keys must be of string type")
         if not isinstance(key, bytes):
-            key = key.encode('latin_1')
+            key = key.encode("latin_1")
         del self._toc[key]
         self._dirty = True
 
