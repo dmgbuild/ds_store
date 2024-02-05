@@ -65,7 +65,7 @@ class DSStoreEntry:
     """
 
     def __init__(self, filename, code, typecode, value=None):
-        if str != bytes and type(filename) == bytes:
+        if str != bytes and isinstance(filename, bytes):
             filename = filename.decode("utf-8")
 
         if not isinstance(code, bytes):
