@@ -1,3 +1,7 @@
+========
+ds_store
+========
+
 .. |pyversions| image:: https://img.shields.io/pypi/pyversions/ds_store.svg
    :target: https://pypi.python.org/pypi/ds_store
    :alt: Python Versions
@@ -17,10 +21,6 @@
 .. |ci| image:: https://github.com/dmgbuild/ds_store/workflows/CI/badge.svg?branch=main
    :target: https://github.com/dmgbuild/ds_store/actions
    :alt: Build Status
-
-========
-ds_store
-========
 
 |pyversions| |version| |maturity| |license| |ci|
 
