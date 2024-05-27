@@ -39,7 +39,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "http://alastairs-place.net/projects/ds_store"
+Documentation = "https://ds-store.readthedocs.io/en/latest/"
+Homepage = "https://github.com/dmgbuild/ds_store"
+Tracker = "https://github.com/dmgbuild/ds_store/issues"
 Source = "https://github.com/dmgbuild/ds_store"
 
 [project.scripts]
