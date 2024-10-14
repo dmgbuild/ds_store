@@ -892,9 +892,10 @@ class DSStore:
                 _ = parent.tell()
 
             if left_node and right_node:
-                with self._get_block(left_node) as left, self._get_block(
-                    right_node
-                ) as right:
+                with (
+                    self._get_block(left_node) as left,
+                    self._get_block(right_node) as right,
+                ):
                     blocks = [left, block, right]
                     pivots = [left_pivot, right_pivot]
 
