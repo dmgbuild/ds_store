@@ -51,7 +51,7 @@ ds_store = "ds_store.__main__:main"
 [project.optional-dependencies]
 dev = [
     "coverage == 7.10.2",
-    "pre-commit == 4.2.0",
+    "pre-commit == 4.3.0",
     "pytest == 8.4.1",
     "tox == 4.28.4",
 ]
