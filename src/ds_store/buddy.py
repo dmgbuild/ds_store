@@ -67,7 +67,7 @@ class Block:
             fmt = None
 
         if self._size - self._pos < size:
-            raise BuddyError("Unable to read %lu bytes in block" % size)
+            raise BuddyError(f"Unable to read {size} bytes in block")
 
         data = self._value[self._pos : self._pos + size]
         self._pos += size
@@ -157,9 +157,9 @@ class Allocator:
 
         # Read the free lists
         self._free = []
-        for n in range(32):
+        for _ in range(32):
             count = self._root.read(">I")
-            self._free.append(list(self._root.read(">%uI" % count)))
+            self._free.append(list(self._root.read(f">{count[0]}I")))
 
     @classmethod
     def open(cls, file_or_name, mode="r+"):
@@ -208,10 +208,7 @@ class Allocator:
                 2048,
                 1264,
                 2048,
-                b"\x00\x00\x10\x0c"
-                b"\x00\x00\x00\x87"
-                b"\x00\x00\x20\x0b"
-                b"\x00\x00\x00\x00",
+                b"\x00\x00\x10\x0c\x00\x00\x00\x87\x00\x00\x20\x0b\x00\x00\x00\x00",
             )
             f.write(header)
             f.write(b"\0" * 2016)
@@ -345,7 +342,7 @@ class Allocator:
     def _write_root_block_into(self, block):
         # Offsets
         block.write(">II", len(self._offsets), self._unknown2)
-        block.write(">%uI" % len(self._offsets), *self._offsets)
+        block.write(f">{len(self._offsets)}I", *self._offsets)
         extra = len(self._offsets) & 255
         if extra:
             block.write(b"\0\0\0\0" * (256 - extra))
@@ -361,10 +358,10 @@ class Allocator:
             block.write(">I", self._toc[k])
 
         # Free list
-        for w, f in enumerate(self._free):
+        for _, f in enumerate(self._free):
             block.write(">I", len(f))
             if len(f):
-                block.write(">%uI" % len(f), *f)
+                block.write(f">{len(f)}I", *f)
 
     def _buddy(self, offset, width):
         f = self._free[width]
