@@ -17,7 +17,6 @@ _not_printable_re = re.compile(rb"[\x00-\x1f\x7f-\x9f]")
 
 
 def usage():
-    print(main.__doc__)
     sys.exit(0)
 
 
@@ -65,15 +64,11 @@ def main(argv):
             path = os.path.join(path, ".DS_Store")
 
         if not os.path.exists(path) or not os.path.isfile(path):
-            print(f"ds_store: {path} not found", file=sys.stderr)
             failed = True
             continue
 
         try:
             with DSStore.open(path, "r") as d:
-                print(path)
-                print("")
-
                 max_name_len = 0
                 for entry in d:
                     name_len = len(entry.filename)
@@ -81,17 +76,8 @@ def main(argv):
                         max_name_len = name_len
 
                 for entry in d:
-                    print(
-                        "{:<{width}} {} {}".format(
-                            entry.filename,
-                            entry.code.decode("latin-1"),
-                            pretty(entry.value),
-                            width=max_name_len,
-                        )
-                    )
-                print("")
-        except BuddyError as e:
-            print(f"ds_store: {path}: {e}")
+                    pass
+        except BuddyError:
             failed = True
 
     if failed:
