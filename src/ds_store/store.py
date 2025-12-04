@@ -65,7 +65,7 @@ class DSStoreEntry:
     """
 
     def __init__(self, filename, code, typecode, value=None):
-        if str != bytes and isinstance(filename, bytes):
+        if isinstance(filename, bytes):
             filename = filename.decode("utf-8")
 
         if not isinstance(code, bytes):
@@ -107,7 +107,7 @@ class DSStoreEntry:
         elif typecode == b"comp" or typecode == b"dutc":
             value = block.read(b">Q")[0]
         else:
-            raise ValueError('Unknown type code "%s"' % typecode)
+            raise ValueError(f'Unknown type code "{typecode}"')
 
         return DSStoreEntry(filename, code, typecode, value)
 
@@ -146,10 +146,10 @@ class DSStoreEntry:
         ofl = other.filename.lower()
 
         selfCode = self.code
-        if str != bytes and type(selfCode) is bytes:
+        if isinstance(selfCode, bytes):
             selfCode = selfCode.decode("utf-8")
         otherCode = other.code
-        if str != bytes and type(otherCode) is bytes:
+        if isinstance(otherCode, bytes):
             otherCode = otherCode.decode("utf-8")
 
         return sfl > ofl or (sfl == ofl and selfCode > otherCode)
@@ -190,7 +190,7 @@ class DSStoreEntry:
         elif entry_type == b"comp" or entry_type == b"dutc":
             length += 8
         else:
-            raise ValueError('Unknown type code "%s"' % entry_type)
+            raise ValueError(f'Unknown type code "{entry_type}"')
 
         return length
 
@@ -234,7 +234,7 @@ class DSStoreEntry:
         elif entry_type == b"comp" or entry_type == b"dutc":
             w(b">Q", value)
         else:
-            raise ValueError('Unknown type code "%s"' % entry_type)
+            raise ValueError(f'Unknown type code "{entry_type}"')
 
     def __repr__(self):
         return f"<{self.filename} {self.code}>"
@@ -456,29 +456,16 @@ class DSStore:
     def _dump_node(self, node):
         with self._get_block(node) as block:
             next_node, count = block.read(b">II")
-            print("next: %u\ncount: %u\n" % (next_node, count))
             for n in range(count):
                 if next_node:
-                    ptr = block.read(b">I")[0]
-                    print("%8u " % ptr, end=" ")
+                    block.read(b">I")[0]
                 else:
-                    print("         ", end=" ")
-                e = DSStoreEntry.read(block)
-                print(e, " (%u)" % e.byte_length())
-            print("used: %u" % block.tell())
+                    pass
+                DSStoreEntry.read(block)
 
     # Display the data in the super block
     def _dump_super(self):
-        print(
-            "root: %u\nlevels: %u\nrecords: %u\nnodes: %u\npage-size: %u"
-            % (
-                self._rootnode,
-                self._levels,
-                self._records,
-                self._nodes,
-                self._page_size,
-            )
-        )
+        pass
 
     # Splits entries across two blocks, returning one pivot
     #
@@ -558,7 +545,6 @@ class DSStore:
         self._dirty = True
         new_right = self._store.allocate(self._page_size)
         with self._get_block(node) as block, self._get_block(new_right) as right_block:
-
             # First, measure and extract all the elements
             entry_size = entry.byte_length()
             # ?? entry_pos = None
@@ -1216,7 +1202,7 @@ class DSStore:
 
         def __getitem__(self, code):
             if code is None:
-                raise KeyError("no such key - [%s][None]" % self._filename)
+                raise KeyError(f"no such key - [{self._filename}][None]")
 
             if not isinstance(code, bytes):
                 code = code.encode("latin_1")
@@ -1233,7 +1219,7 @@ class DSStore:
 
         def __setitem__(self, code, value):
             if code is None:
-                raise KeyError("bad key - [%s][None]" % self._filename)
+                raise KeyError(f"bad key - [{self._filename}][None]")
 
             if not isinstance(code, bytes):
                 code = code.encode("latin_1")
@@ -1252,7 +1238,7 @@ class DSStore:
 
         def __delitem__(self, code):
             if code is None:
-                raise KeyError("no such key - [%s][None]" % self._filename)
+                raise KeyError(f"no such key - [{self._filename}][None]")
 
             self._store.delete(self._filename, code)
 
