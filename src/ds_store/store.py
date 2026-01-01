@@ -555,14 +555,16 @@ class DSStore:
             entries = []
             before = []
             total = 0
+            inserted = False
             for n in range(count):
                 pos = block.tell()
                 if next_node:
                     ptr = block.read(b">I")[0]
                     pointers.append(ptr)
                 e = DSStoreEntry.read(block)
-                if e > entry:
+                if not inserted and e > entry:
                     # ?? entry_pos = n
+                    inserted = True
                     entries.append(entry)
                     pointers.append(right_ptr)
                     before.append(total)
@@ -570,6 +572,13 @@ class DSStore:
                 entries.append(e)
                 before.append(total)
                 total += block.tell() - pos
+            # If entry wasn't inserted (it's larger than all existing), add at end
+            if not inserted:
+                entries.append(entry)
+                if next_node:
+                    pointers.append(right_ptr)
+                before.append(total)
+                total += entry_size
             before.append(total)
             if next_node:
                 pointers.append(next_node)
