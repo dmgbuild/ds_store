@@ -576,12 +576,18 @@ class DSStore:
             if not inserted:
                 entries.append(entry)
                 if next_node:
-                    pointers.append(right_ptr)
+                    # For largest entry: next_node becomes the pointer BEFORE entry
+                    pointers.append(next_node)
                 before.append(total)
                 total += entry_size
             before.append(total)
             if next_node:
-                pointers.append(next_node)
+                if inserted:
+                    # Mid-value case: next_node stays as the rightmost pointer
+                    pointers.append(next_node)
+                else:
+                    # Largest entry case: right_ptr becomes the new rightmost pointer
+                    pointers.append(right_ptr)
 
             pivot = self._split2(
                 [block, right_block], entries, pointers, before, bool(next_node)
