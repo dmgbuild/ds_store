@@ -132,3 +132,5 @@ extend-select = [
 [tool.ruff.lint.per-file-ignores]
 # E501: line too long
 "tests/examples/settings.py" = ["E501"]
+# T201: the command-line tool legitimately writes its output to stdout
+"src/ds_store/__main__.py" = ["T201"]
