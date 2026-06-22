@@ -18,8 +18,8 @@ ds_store
    :target: https://github.com/dmgbuild/ds_store/blob/main/LICENSE
    :alt: MIT License
 
-.. |ci| image:: https://github.com/dmgbuild/ds_store/workflows/CI/badge.svg?branch=main
-   :target: https://github.com/dmgbuild/ds_store/actions
+.. |ci| image:: https://github.com/dmgbuild/ds_store/actions/workflows/ci.yml/badge.svg?branch=main
+   :target: https://github.com/dmgbuild/ds_store/actions/workflows/ci.yml
    :alt: Build Status
 
 |pyversions| |version| |maturity| |license| |ci|
