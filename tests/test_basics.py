@@ -1,5 +1,6 @@
 # Some basic test code
 import os
+import plistlib
 import sys
 
 from ds_store import DSStore, __main__
@@ -69,3 +70,16 @@ def test_cli_entry_point_takes_no_args(capsys, monkeypatch):
     __main__.main()  # must not raise
 
     assert "bam" in capsys.readouterr().out
+
+
+def test_pretty_decodes_binary_plist():
+    """Binary-plist blob values (e.g. lsvC) render as their decoded contents,
+    not as a raw hex dump or latin-1 bytes."""
+    blob = plistlib.dumps({"sortColumn": "dateAdded"}, fmt=plistlib.FMT_BINARY)
+
+    # blob records arrive as bytearray, plain plists as bytes; handle both.
+    for value in (blob, bytearray(blob)):
+        out = __main__.pretty(value)
+        assert "sortColumn" in out
+        assert "dateAdded" in out
+        assert "bplist00" not in out

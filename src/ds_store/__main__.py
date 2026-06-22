@@ -6,6 +6,7 @@
 import argparse
 import os
 import os.path
+import plistlib
 import pprint
 import re
 import sys
@@ -26,6 +27,14 @@ def chunks(iterable, length):
 
 
 def pretty(value):
+    if isinstance(value, (bytes, bytearray)) and bytes(value[:8]) == b"bplist00":
+        # Several records (e.g. lsvC) store a binary plist; show the decoded
+        # contents rather than a raw hex dump or latin-1 bytes.
+        try:
+            return pretty(plistlib.loads(bytes(value)))
+        except Exception:
+            pass
+
     if isinstance(value, dict):
         return f"{{\n {pprint.pformat(value, indent=4)[1:-1]}\n}}"
     elif isinstance(value, bytearray):
