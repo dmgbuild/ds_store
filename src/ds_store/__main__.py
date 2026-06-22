@@ -70,9 +70,6 @@ def main(argv=None):
 
         try:
             with DSStore.open(path, "r") as d:
-                print(path)
-                print()
-
                 max_name_len = 0
                 for entry in d:
                     name_len = len(entry.filename)
