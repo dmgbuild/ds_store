@@ -16,10 +16,6 @@ from ds_store.buddy import BuddyError
 _not_printable_re = re.compile(rb"[\x00-\x1f\x7f-\x9f]")
 
 
-def usage():
-    sys.exit(0)
-
-
 def chunks(iterable, length):
     for i in range(0, len(iterable), length):
         yield i, iterable[i : i + length]
@@ -43,7 +39,7 @@ def pretty(value):
         return value
 
 
-def main(argv):
+def main(argv=None):
     """Display the contents of the .DS_Store file at the specified path.
 
     If you specify just a directory, ds_store will inspect the .DS_Store
@@ -64,6 +60,7 @@ def main(argv):
             path = os.path.join(path, ".DS_Store")
 
         if not os.path.exists(path) or not os.path.isfile(path):
+            print(f"ds_store: {path} not found", file=sys.stderr)
             failed = True
             continue
 
@@ -76,8 +73,17 @@ def main(argv):
                         max_name_len = name_len
 
                 for entry in d:
-                    pass
-        except BuddyError:
+                    print(
+                        "{:<{width}} {} {}".format(
+                            entry.filename,
+                            entry.code.decode("latin-1"),
+                            pretty(entry.value),
+                            width=max_name_len,
+                        )
+                    )
+                print()
+        except BuddyError as e:
+            print(f"ds_store: {path}: {e}")
             failed = True
 
     if failed:

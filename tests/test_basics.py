@@ -1,7 +1,8 @@
 # Some basic test code
 import os
+import sys
 
-from ds_store import DSStore
+from ds_store import DSStore, __main__
 
 
 def test_create(tmpdir):
@@ -47,3 +48,24 @@ def test_find(tmpdir):
         assert len(bamIloc) == 1
         bam = list(store.find("bam"))
         assert bamIloc == bam
+
+
+def test_cli_prints_entries(capsys):
+    """The command-line tool should print the entries it reads, not swallow
+    them. Guards against the loop being reduced to ``pass``."""
+    __main__.main(["tests/Test_DS_Store"])
+
+    out = capsys.readouterr().out
+    assert "bam" in out
+    assert "Iloc" in out
+
+
+def test_cli_entry_point_takes_no_args(capsys, monkeypatch):
+    """The console_scripts entry point calls ``main()`` with no arguments, so
+    ``argv`` must default to ``sys.argv[1:]``. Guards against a TypeError on
+    every invocation."""
+    monkeypatch.setattr(sys, "argv", ["ds_store", "tests/Test_DS_Store"])
+
+    __main__.main()  # must not raise
+
+    assert "bam" in capsys.readouterr().out
