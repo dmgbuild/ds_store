@@ -17,10 +17,6 @@ from ds_store.buddy import BuddyError
 _not_printable_re = re.compile(rb"[\x00-\x1f\x7f-\x9f]")
 
 
-def usage():
-    sys.exit(0)
-
-
 def chunks(iterable, length):
     for i in range(0, len(iterable), length):
         yield i, iterable[i : i + length]
@@ -79,9 +75,6 @@ def main(argv=None):
 
         try:
             with DSStore.open(path, "r") as d:
-                print(path)
-                print()
-
                 max_name_len = 0
                 for entry in d:
                     name_len = len(entry.filename)
