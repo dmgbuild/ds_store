@@ -456,16 +456,24 @@ class DSStore:
     def _dump_node(self, node):
         with self._get_block(node) as block:
             next_node, count = block.read(b">II")
+            print(f"next: {next_node}\ncount: {count}\n")
             for n in range(count):
                 if next_node:
-                    block.read(b">I")[0]
+                    ptr = block.read(b">I")[0]
+                    print(f"{ptr:8} ", end=" ")
                 else:
-                    pass
-                DSStoreEntry.read(block)
+                    print("         ", end=" ")
+                e = DSStoreEntry.read(block)
+                print(e, f" ({e.byte_length()})")
+            print(f"used: {block.tell()}")
 
     # Display the data in the super block
     def _dump_super(self):
-        pass
+        print(
+            f"root: {self._rootnode}\nlevels: {self._levels}\n"
+            f"records: {self._records}\nnodes: {self._nodes}\n"
+            f"page-size: {self._page_size}"
+        )
 
     # Splits entries across two blocks, returning one pivot
     #
