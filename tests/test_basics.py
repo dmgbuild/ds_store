@@ -19,7 +19,7 @@ def test_create(tmpdir):
 
 
 def test_can_read(tmpdir):
-    """Test that we can retrieve data from a .DS_Store file written by OS X."""
+    """Test that we can retrieve data from a .DS_Store file written by macOS."""
     with DSStore.open("tests/Test_DS_Store", "r") as store:
         assert store["bam"]["Iloc"] == (104, 116)
         assert store["bar"]["Iloc"] == (256, 235)
