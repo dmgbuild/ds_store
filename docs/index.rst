@@ -11,13 +11,13 @@ This document refers to version |release|
 What is this?
 =============
 
-Historically the Mac OS Finder stored additional per-file information in a
+Historically the macOS Finder stored additional per-file information in a
 special Finder Info field in the HFS/HFS+ filesystem.  It also held other
 information in a single file known as the Desktop Database.
 
 Filesystems other than HFS obviously do not have the Finder Info structure,
 and until recently support for extended attributes was rare.  As a result, the
-Mac OS X Finder was written to store the necessary information in hidden files
+macOS Finder was written to store the necessary information in hidden files
 named ``.DS_Store``, which it places into every directory where it needs to
 store information.
 
@@ -30,12 +30,12 @@ to set many of these things is via Finder itself.  You might think that you
 could drive Finder with AppleScript for this purpose, but this turns out to be
 unreliable (Finder may not save the changes to the ``.DS_Store`` file
 immediately), and worse still Apple has made changes to the information Finder
-uses between versions of Mac OS X, such that setting some of these things on
-newer versions of the OS X Finder will not set them for users of older
+uses between versions of macOS, such that setting some of these things on
+newer versions of the macOS Finder will not set them for users of older
 versions.
 
 This module allows programmatic access to and construction of ``.DS_Store``
-files directly from Python, with no Mac OS X specific code involved.
+files directly from Python, with no macOS specific code involved.
 
 Usage
 =====
