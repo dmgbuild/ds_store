@@ -52,20 +52,20 @@ ds_store = "ds_store.__main__:main"
 [dependency-groups]
 package = [
     "build == 1.5.0",
-    "twine == 6.2.0",
+    "twine == 7.0.0",
 ]
 
 pre-commit = [
-    "prek == 0.4.8",
+    "prek == 0.4.11",
 ]
 
 test = [
-    "coverage == 7.15.0",
+    "coverage == 7.15.2",
     "pytest == 9.1.1",
 ]
 
 tox = [
-    "tox-uv == 1.35.2"
+    "tox-uv == 1.36.0"
 ]
 
 dev = [
@@ -131,3 +131,6 @@ extend-select = [
 [tool.ruff.lint.per-file-ignores]
 # E501: line too long
 "tests/examples/settings.py" = ["E501"]
+# Ignores needed to pass the Ruff 0.16 update.
+"src/ds_store/__main__.py" = ["BLE001", "S110"]
+"src/ds_store/buddy.py" = ["SIM115"]

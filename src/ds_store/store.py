@@ -841,7 +841,7 @@ class DSStore:
             return
 
         with self._get_block(node) as block:
-            next_node, count = block.read(b">II")
+            next_node, _count = block.read(b">II")
 
             with self._get_block(path[-1]) as parent:
                 # Find the left and right siblings and respective pivots
@@ -997,7 +997,7 @@ class DSStore:
             self._dirty = True
             self._rootnode = node
         else:
-            count, used = self._block_usage(path[-1])
+            _count, used = self._block_usage(path[-1])
 
             if used < self._page_size // 2:
                 self._rebalance(path[:-1], path[-1])

@@ -78,8 +78,7 @@ def main(argv=None):
                 max_name_len = 0
                 for entry in d:
                     name_len = len(entry.filename)
-                    if name_len > max_name_len:
-                        max_name_len = name_len
+                    max_name_len = max(max_name_len, name_len)
 
                 for entry in d:
                     print(
