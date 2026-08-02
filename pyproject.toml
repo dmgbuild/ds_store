@@ -131,3 +131,6 @@ extend-select = [
 [tool.ruff.lint.per-file-ignores]
 # E501: line too long
 "tests/examples/settings.py" = ["E501"]
+# Ignores needed to pass the Ruff 0.16 update.
+"src/ds_store/__main__.py" = ["BLE001", "S110"]
+"src/ds_store/buddy.py" = ["SIM115"]
