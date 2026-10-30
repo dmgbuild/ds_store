@@ -101,6 +101,21 @@ If ``ds_store`` happens across any other type code, it will raise
 format does not include length information, so if we find a type code we do
 not support, we cannot read the file.
 
+Command line usage
+==================
+
+``ds_store`` also installs a ``ds_store`` command that displays the contents
+of ``.DS_Store`` files::
+
+  $ ds_store path/to/folder
+
+If a directory is given, the ``.DS_Store`` file in that directory is
+displayed; if no paths are given, the ``.DS_Store`` file in the current
+directory is displayed.
+
+To display the version of ``ds_store`` that is installed, run
+``ds_store --version``.
+
 Code Documentation
 ==================
 

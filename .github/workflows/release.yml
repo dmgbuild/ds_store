@@ -67,7 +67,7 @@ jobs:
         # Check that the version number of the installed wheel matches the tag.
         run: |
           set -x
-          test $(python -c "import ds_store; print(ds_store.__version__)") = $VERSION
+          test $(ds_store --version | awk '{print $2}') = $VERSION
 
       - name: Create release
         env:

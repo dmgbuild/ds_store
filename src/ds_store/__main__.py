@@ -11,7 +11,7 @@ import pprint
 import re
 import sys
 
-from ds_store import DSStore
+from ds_store import DSStore, __version__
 from ds_store.buddy import BuddyError
 
 _not_printable_re = re.compile(rb"[\x00-\x1f\x7f-\x9f]")
@@ -58,6 +58,11 @@ def main(argv=None):
 
     parser = argparse.ArgumentParser(description=main.__doc__)
     parser.add_argument("paths", nargs="*")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"ds_store {__version__}",
+    )
     args = parser.parse_args(argv)
 
     if len(args.paths) == 0:

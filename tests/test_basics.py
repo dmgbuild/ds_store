@@ -3,7 +3,9 @@ import os
 import plistlib
 import sys
 
-from ds_store import DSStore, __main__
+import pytest
+
+from ds_store import DSStore, __main__, __version__
 
 
 def test_create(tmpdir):
@@ -83,3 +85,14 @@ def test_pretty_decodes_binary_plist():
         assert "sortColumn" in out
         assert "dateAdded" in out
         assert "bplist00" not in out
+
+
+def test_cli_version(capsys):
+    """``--version`` prints the program name and version, then exits cleanly."""
+    with pytest.raises(SystemExit) as exc_info:
+        __main__.main(["--version"])
+
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    assert captured.out == f"ds_store {__version__}\n"
+    assert captured.err == ""
