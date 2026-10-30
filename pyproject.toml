@@ -8,8 +8,8 @@ build-backend = "setuptools.build_meta"
 dynamic = ["version"]
 name = "ds_store"
 description = "Manipulate Finder .DS_Store files from Python"
-readme = "README.rst"
-requires-python = ">= 3.10"
+readme = "README.md"
+requires-python = ">= 3.11"
 license = "MIT"
 license-files = [
     "LICENSE",
@@ -26,7 +26,6 @@ keywords = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -57,6 +56,10 @@ package = [
 
 pre-commit = [
     "prek == 0.5.4",
+]
+
+towncrier = [
+    "towncrier==26.9.0",
 ]
 
 test = [
@@ -134,3 +137,19 @@ extend-select = [
 # Ignores needed to pass the Ruff 0.16 update.
 "src/ds_store/__main__.py" = ["BLE001", "S110"]
 "src/ds_store/buddy.py" = ["SIM115"]
+
+[tool.towncrier]
+directory = "changes"
+package = "ds_store"
+package_dir = "src"
+filename = "CHANGELOG.md"
+title_format = "## {version} ({project_date})"
+issue_format = "[#{issue}](https://github.com/dmgbuild/ds_store/issues/{issue})"
+template = "changes/template.md"
+type = [
+    { directory = "feature", name = "Features", showcontent = true },
+    { directory = "bugfix", name = "Bugfixes", showcontent = true },
+    { directory = "removal", name = "Backward Incompatible Changes", showcontent = true },
+    { directory = "doc", name = "Documentation", showcontent = true },
+    { directory = "misc", name = "Misc", showcontent = false },
+]
