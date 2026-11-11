@@ -54,14 +54,15 @@ codecs = {
 
 
 class DSStoreEntry:
-    """Holds the data from an entry in a ``.DS_Store`` file.  Note that this is
+    """Holds the data from an entry in a `.DS_Store` file.  Note that this is
     not meant to represent the entry itself---i.e. if you change the type or
     value, your changes will *not* be reflected in the underlying file.
 
     If you want to make a change, you should either use the
-    :class:`DSStore` object's :meth:`DSStore.insert` method (which will
-    replace a key if it already exists), or the mapping access mode for
-    :class:`DSStore` (often simpler anyway).
+    [`DSStore`][ds_store.DSStore] object's
+    [`insert()`][ds_store.DSStore.insert] method (which will replace a key if
+    it already exists), or the mapping access mode for
+    [`DSStore`][ds_store.DSStore] (often simpler anyway).
     """
 
     def __init__(self, filename, code, typecode, value=None):
@@ -78,7 +79,7 @@ class DSStoreEntry:
 
     @classmethod
     def read(cls, block):
-        """Read a ``.DS_Store`` entry from the containing Block."""
+        """Read a `.DS_Store` entry from the containing Block."""
         # First read the filename
         nlen = block.read(b">I")[0]
         filename = block.read(2 * nlen).decode("utf-16be")
@@ -241,35 +242,42 @@ class DSStoreEntry:
 
 
 class DSStore:
-    """Python interface to a ``.DS_Store`` file.  Works by manipulating the
-    file on the disk---so this code will work with ``.DS_Store`` files for.
-
+    """Python interface to a `.DS_Store` file.  Works by manipulating the
+    file on the disk---so this code will work with `.DS_Store` files for
     *very* large directories.
 
-    A :class:`DSStore` object can be used as if it was a mapping, e.g.::
+    A [`DSStore`][ds_store.DSStore] object can be used as if it was a mapping,
+    e.g.:
 
-      d['foobar.dat']['Iloc']
+    ``python
+    d['foobar.dat']['Iloc']
+    ``
 
-    will fetch the "Iloc" record for "foobar.dat", or raise :class:`KeyError` if
-    there is no such record.  If used in this manner, the :class:`DSStore` object
-    will return (type, value) tuples, unless the type is "blob" and the module
-    knows how to decode it.
+    will fetch the "Iloc" record for "foobar.dat", or raise
+    [`KeyError`][KeyError] if there is no such record.  If used in this manner,
+    the [`DSStore`][ds_store.DSStore] object will return (type, value) tuples,
+    unless the type is "blob" and the module knows how to decode it.
 
     Currently, we know how to decode "Iloc", "bwsp", "lsvp", "lsvP" and "icvp"
     blobs.  "Iloc" decodes to an (x, y) tuple, while the others are all decoded
-    using ``biplist`` or ``plistlib`` depending on Python version.
+    using `biplist` or `plistlib` depending on Python version.
 
-    Assignment also works, e.g.::
+    Assignment also works, e.g.:
 
-      d['foobar.dat']['note'] = ('ustr', u'Hello World!')
+    ``python
+    d['foobar.dat']['note'] = ('ustr', u'Hello World!')
+    ``
 
-    as does deletion with ``del``::
+    as does deletion with `del`:
 
-      del d['foobar.dat']['note']
+    ``python
+    del d['foobar.dat']['note']
+    ``
 
     This is usually going to be the most convenient interface, though
-    occasionally (for instance when creating a new ``.DS_Store`` file) you
-    may wish to drop down to using :class:`DSStoreEntry` objects directly.
+    occasionally (for instance when creating a new `.DS_Store` file) you
+    may wish to drop down to using [`DSStoreEntry`][ds_store.DSStoreEntry]
+    objects directly.
     """
 
     def __init__(self, store):
@@ -288,9 +296,9 @@ class DSStore:
 
     @classmethod
     def open(cls, file_or_name, mode="r+", initial_entries=None):
-        """Open a ``.DS_Store`` file; pass either a Python file object, or a
-        filename in the ``file_or_name`` argument and a file access mode in the
-        ``mode`` argument.
+        """Open a `.DS_Store` file; pass either a Python file object, or a
+        filename in the `file_or_name` argument and a file access mode in the
+        `mode` argument.
 
         If you are creating a new file using the "w" or "w+" modes, you
         may also specify a list of entries with which to initialise the
@@ -707,8 +715,8 @@ class DSStore:
                 self._dirty = True
 
     def insert(self, entry):
-        """Insert ``entry`` (which should be a :class:`DSStoreEntry`) into the
-        B-Tree."""
+        """Insert `entry` (which should be a
+        [`DSStoreEntry`][ds_store.DSStoreEntry]) into the B-Tree."""
         path = []
         node = self._rootnode
         while True:
@@ -1113,7 +1121,7 @@ class DSStore:
         return False
 
     def delete(self, filename, code):
-        """Delete an item, identified by ``filename`` and ``code`` from the
+        """Delete an item, identified by `filename` and `code` from the
         B-Tree."""
         if isinstance(filename, DSStoreEntry):
             code = filename.code

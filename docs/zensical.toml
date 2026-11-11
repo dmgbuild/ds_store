@@ -1,0 +1,93 @@
+[project]
+site_name = "ds_store"
+site_description = "Manipulate Finder .DS_Store files from Python"
+site_url = "https://ds-store.readthedocs.io/en/latest/"
+site_author = "Alastair Houghton"
+copyright = "Copyright &copy; Alastair Houghton"
+repo_url = "https://github.com/dmgbuild/ds_store"
+repo_name = "dmgbuild/ds_store"
+docs_dir = "en"
+site_dir = "site"
+# The macros module is build configuration, not site content.
+exclude_docs = """
+macros.py
+"""
+
+nav = [
+  { "Home" = "index.md" },
+  { "Code Documentation" = "ds_store.md" },
+]
+
+[project.theme]
+language = "en"
+features = [
+  "content.code.copy",
+  "navigation.footer",
+  "navigation.indexes",
+  "navigation.instant",
+  "navigation.path",
+  "navigation.sections",
+  "navigation.top",
+  "navigation.tracking",
+  "search.highlight",
+]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[project.markdown_extensions]
+admonition = {}
+attr_list = {}
+md_in_html = {}
+tables = {}
+toc.permalink = true
+pymdownx.blocks.caption = {}
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.superfences = {}
+
+# Provides the {{ release }} and {{ version }} variables (the Sphinx
+# |release| and |version| substitutions).
+[project.plugins.macros]
+module_name = "macros"
+on_error_fail = true
+on_undefined = "strict"
+
+# API documentation (the equivalent of Sphinx's autodoc + intersphinx).
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["src"]
+inventories = ["https://docs.python.org/3/objects.inv"]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+docstring_style = "sphinx"
+extensions = ["griffe_sphinx"]
+allow_inspection = false
+show_source = false
+members_order = "alphabetical"
+annotations_path = "brief"
+merge_init_into_class = true
+separate_signature = false
+show_signature_annotations = true
+signature_crossrefs = true
+show_root_heading = true
+docstring_section_style = "spacy"
+line_length = 80
+show_symbol_type_toc = true
+show_symbol_type_heading = true
+show_attribute_values = false
+heading_level = 3
