@@ -12,8 +12,8 @@
 # serve to show the default.
 
 import os
-import re
 import sys
+from importlib.metadata import version
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -54,14 +54,7 @@ copyright = "2014, Alastair Houghton"
 # built documents.
 #
 # The full version, including alpha/beta/rc tags.
-with open("../src/ds_store/__init__.py", encoding="utf8") as version_file:
-    version_match = re.search(
-        r"^__version__ = ['\"]([^'\"]*)['\"]", version_file.read(), re.MULTILINE
-    )
-    if version_match:
-        release = version_match.group(1)
-    else:
-        raise RuntimeError("Unable to find version string.")
+release = version("ds_store")
 
 # The short X.Y version.
 version = ".".join(release.split(".")[:2])

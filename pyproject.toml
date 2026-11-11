@@ -1,6 +1,7 @@
 [build-system]
 requires = [
     "setuptools==84.2.1",
+    "setuptools_scm==10.3.4",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -84,8 +85,8 @@ docs = [
     "sphinx == 9.0.4",
 ]
 
-[tool.setuptools.dynamic]
-version = {attr = "ds_store.__version__"}
+[tool.setuptools_scm]
+# An empty table is needed to enable setuptools_scm
 
 [tool.coverage.run]
 branch = true
