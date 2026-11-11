@@ -2,6 +2,25 @@
 
 <!-- towncrier release notes start -->
 
+## 1.3.4 (2026-11-11)
+
+### Features
+
+* A `--version` option was added to the `ds_store` command line tool. ([#229](https://github.com/dmgbuild/ds_store/issues/229))
+* Support for Python 3.16 was added. ([#230](https://github.com/dmgbuild/ds_store/issues/230))
+
+### Backward Incompatible Changes
+
+* Support for Python 3.10 was dropped. ([#229](https://github.com/dmgbuild/ds_store/issues/229))
+
+### Documentation
+
+* References to "Mac OS X" were updated to "macOS". ([#224](https://github.com/dmgbuild/ds_store/issues/224))
+
+### Misc
+
+* [#222](https://github.com/dmgbuild/ds_store/issues/222), [#223](https://github.com/dmgbuild/ds_store/issues/223), [#225](https://github.com/dmgbuild/ds_store/issues/225), [#226](https://github.com/dmgbuild/ds_store/issues/226), [#227](https://github.com/dmgbuild/ds_store/issues/227), [#228](https://github.com/dmgbuild/ds_store/issues/228), [#230](https://github.com/dmgbuild/ds_store/issues/230), [#231](https://github.com/dmgbuild/ds_store/issues/231), [#236](https://github.com/dmgbuild/ds_store/issues/236)
+
 ## 1.3.3 (2026-06-23)
 
 ### Features
