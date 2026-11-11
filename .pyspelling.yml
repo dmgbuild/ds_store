@@ -44,6 +44,10 @@ matrix:
         - open: '{{'
           content: '[\d\D]*'
           close: '}}'
+        # Ignore anchor links
+        - open: '{ #'
+          content: '\w*'
+          close: ' }'
         # Ignores the autorefs link targets
         - open: '\]\['
           content: '[\d\D]*'
