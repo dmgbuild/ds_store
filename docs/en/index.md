@@ -1,0 +1,80 @@
+# ds_store {{ release }}
+
+## What is this?
+
+Historically the macOS Finder stored additional per-file information in a special Finder Info field in the HFS/HFS+ file system. It also held other information in a single file known as the Desktop Database.
+
+File systems other than HFS obviously do not have the Finder Info structure, and until recently support for extended attributes was rare. As a result, the macOS Finder was written to store the necessary information in hidden files named `.DS_Store`, which it places into every directory where it needs to store information.
+
+The format of these files is, sadly, not documented by Apple. This is a pain for software developers, who often distribute their software in Apple Disk Image (or `.dmg`) files. Typically developers set an attractive background on their disk images, increase the icon size and font size and often include a link to the `/Applications` folder. Unfortunately, the only supported way to set many of these things is via Finder itself. You might think that you could drive Finder with AppleScript for this purpose, but this turns out to be unreliable (Finder may not save the changes to the `.DS_Store` file immediately), and worse still Apple has made changes to the information Finder uses between versions of macOS, such that setting some of these things on newer versions of the macOS Finder will not set them for users of older versions.
+
+This module allows programmatic access to and construction of `.DS_Store` files directly from Python, with no macOS specific code involved.
+
+## Usage
+
+Typical usage looks like this:
+
+```python
+from ds_store import DSStore
+
+with DSStore.open("/Users/alastair/.DS_Store", "r+") as d:
+    # Position the icon for "foo.txt" at (128, 128)
+    d["foo.txt"]["Iloc"] = (128, 128)
+
+    # Display the plists for this folder
+    print(d["."]["bwsp"])
+    print(d["."]["icvp"])
+```
+
+**Importantly**, *deleting the [`DSStore`][ds_store.DSStore] object is not sufficient to flush changes to disk*. If you use the `with` syntax above, changes you make to the `.DS_Store` file will automatically be persisted. Otherwise, you will need to call [`flush()`][ds_store.DSStore.flush] or [`close()`][ds_store.DSStore.close] to flush your changes to disk.
+
+Note that Finder generally places information about folders in the *containing* folder. The exception is that if it cannot write to the containing folder, or the folder in question is at the root of a volume, Finder will put the information in a record for "." inside the folder to which it applies.
+
+`ds_store` currently knows how to decode the following items
+
+| Code   | Type   | Python representation  |
+|--------|--------|------------------------|
+| `Iloc` | `blob` | `(x, y)` tuple         |
+| `bwsp` | `blob` | Property list (`dict`) |
+| `lsvp` | `blob` | Property list (`dict`) |
+| `lsvP` | `blob` | Property list (`dict`) |
+| `icvp` | `blob` | Property list (`dict`) |
+
+/// table-caption
+Supported item codes
+///
+
+Items not in the list above will be returned as `(type, value)` tuples. Supported `type` values are
+
+| Type   | Python representation           |
+|--------|---------------------------------|
+| `bool` | Boolean (`True` or `False`)     |
+| `long` | Integer                         |
+| `shor` | Integer                         |
+| `ustr` | Unicode string                  |
+| `type` | 4-character byte string         |
+| `comp` | Integer                         |
+| `dutc` | Integer                         |
+| `blob` | Byte string                     |
+
+/// table-caption
+Supported type codes
+///
+
+If `ds_store` happens across any other type code, it will raise [`ValueError`][ValueError]. This is unavoidable because the `.DS_Store` file format does not include length information, so if we find a type code we do not support, we cannot read the file.
+
+## Command line usage
+
+`ds_store` also installs a `ds_store` command that displays the contents of `.DS_Store` files:
+
+```console
+$ ds_store path/to/folder
+```
+
+If a directory is given, the `.DS_Store` file in that directory is displayed; if no paths are given, the `.DS_Store` file in the current directory is displayed.
+
+To display the version of `ds_store` that is installed, run `ds_store --version`.
+
+## Code Documentation
+
+- [`ds_store` package](ds_store.md)
