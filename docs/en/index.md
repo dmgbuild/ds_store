@@ -1,6 +1,4 @@
-# `ds_store` - Manipulate Finder `.DS_Store` files from Python
-
-This document refers to version {{ release }}
+# ds_store {{ release }}
 
 ## What is this?
 

@@ -14,7 +14,7 @@ macros.py
 """
 
 nav = [
-  { "Home" = "index.md" },
+  { "ds_store ({{ release }})" = "index.md" },
   { "Code Documentation" = "ds_store.md" },
 ]
 
