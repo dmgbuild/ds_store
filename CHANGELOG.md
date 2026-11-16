@@ -16,6 +16,7 @@
 ### Documentation
 
 * References to "Mac OS X" were updated to "macOS". ([#224](https://github.com/dmgbuild/ds_store/issues/224))
+* The documentation has been converted from Sphinx reStructuredText to Zensical Markdown. ([#237](https://github.com/dmgbuild/ds_store/issues/237))
 
 ### Misc
 
